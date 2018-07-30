@@ -1,0 +1,28 @@
+namespace memb;
+
+table Full {
+    values: [float];
+}
+
+table Ubyte {
+    min_value: float;
+    max_value: float;
+    values: [uint8];
+}
+
+union Storage {
+    Full,
+    Ubyte
+}
+
+table Node {
+    word: string(key);
+    storage: Storage;
+}
+
+table Index {
+    nodes: [Node];
+    dim: uint;
+}
+
+root_type Index;
