@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import csv
 
-from memb import Builder
+from memb import Builder, available_compression_strategies
 
 
 def convert_fasttext(filename):
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert word vectors to binary format.')
     parser.add_argument('--from', dest='source_filename', required=True)
     parser.add_argument('--to', dest='dest_filename', required=True)
-    parser.add_argument('--quantizer', dest='quantizer', required=True, choices=['ubyte', 'full'])
+    parser.add_argument('--quantizer', dest='quantizer', required=True, choices=available_compression_strategies())
     parser.add_argument('--converter', dest='converter', required=True, choices=FILE_CONVERTERS.keys())
     args = parser.parse_args()
 
@@ -57,6 +57,6 @@ if __name__ == '__main__':
         try:
             builder.add_word(word, np.float32(row.values[:dim]))
         except Exception as e:
-            print('Exception ({}) while trying to add word {}'.format(e, word))
+            print('Exception ({}) while trying to add word'.format(e))
 
     builder.save(args.dest_filename)

@@ -2,10 +2,20 @@
 
 namespace memb {
 
+Reader::Reader(const std::string& filename,
+               std::shared_ptr<CompressionStrategy> compressionStrategy):
+    mappedFile_(filename),
+    flatIndex_(wire::GetIndex(mappedFile_.data())),
+    compressedStorage_(compressionStrategy->createCompressedStorage(
+        flatIndex_->storage(), flatIndex_->dim()))
+{
+}
+
 Reader::Reader(const std::string& filename):
     mappedFile_(filename),
-    quantizationMap_(createQuantizationMap()),
-    flatIndex_(GetIndex(mappedFile_.data()))
+    flatIndex_(wire::GetIndex(mappedFile_.data())),
+    compressedStorage_(createCompressionStrategy(flatIndex_->storage_type())->createCompressedStorage(
+        flatIndex_->storage(), flatIndex_->dim()))
 {}
 
 size_t Reader::dim() const
@@ -15,10 +25,7 @@ size_t Reader::dim() const
 
 void Reader::wordEmbeddingToBuffer(const std::string& word, float* buffer) const
 {
-    auto resultNode = flatIndex_->nodes()->LookupByKey(word.c_str());
-    if (resultNode) {
-        quantizationMap_.at(resultNode->storage_type())->dequantize(resultNode->storage(), buffer);
-    }
+    return compressedStorage_->extract(word, buffer);
 }
 
 void Reader::batchEmbeddingToBuffer(const std::vector<std::string>& words, float* buffer) const

@@ -1,0 +1,7 @@
+namespace memb.wire;
+
+table HuffmanDecoder {
+    keys: [uint8];
+    size_offsets: [uint32];
+}
+

@@ -1,27 +1,17 @@
-namespace memb;
+include "full_compression.fbs";
+include "ubyte_compression.fbs";
+include "huffman_compression.fbs";
 
-table Full {
-    values: [float];
-}
-
-table Ubyte {
-    min_value: float;
-    max_value: float;
-    values: [uint8];
-}
+namespace memb.wire;
 
 union Storage {
     Full,
-    Ubyte
-}
-
-table Node {
-    word: string(key);
-    storage: Storage;
+    Ubyte,
+    Huffman
 }
 
 table Index {
-    nodes: [Node];
+    storage: Storage;
     dim: uint;
 }
 

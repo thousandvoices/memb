@@ -11,10 +11,42 @@ find_package(Boost 1.64 COMPONENTS iostreams unit_test_framework REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-std=c++14 -fPIC -Werror")
 
-set(FLATBUFFER_SCHEMAS src/flatbuffers/embeddings.fbs)
-set(MEMB_SOURCES src/builder.cpp src/reader.cpp src/quantization.cpp)
-set(MEMB_HEADERS src/builder.h src/reader.h src/quantization.h)
-set(TEST_SOURCES src/tests.cpp)
+set(FLATBUFFER_SCHEMAS
+    src/flatbuffers/kmeans.fbs
+    src/flatbuffers/huffman_decoder.fbs
+    src/flatbuffers/full_compression.fbs
+    src/flatbuffers/ubyte_compression.fbs
+    src/flatbuffers/huffman_compression.fbs
+    src/flatbuffers/embeddings.fbs)
+
+set(MEMB_SOURCES
+    src/builder.cpp
+    src/reader.cpp
+    src/bit_stream.cpp
+    src/compression_strategy.cpp
+    src/kmeans.cpp
+    src/huffman_encoder.cpp
+    src/huffman_decoder.cpp
+    src/huffman_compression.cpp
+    src/full_compression.cpp
+    src/ubyte_compression.cpp)
+
+set(MEMB_HEADERS
+    src/builder.h
+    src/reader.h
+    src/bit_stream.h
+    src/compression_strategy.h
+    src/kmeans.h
+    src/huffman_encoder.h
+    src/huffman_decoder.h
+    src/huffman_compression.h
+    src/full_compression.h
+    src/ubyte_compression.h)
+
+set(TEST_SOURCES
+    src/kmeans_tests.cpp
+    src/bit_stream_tests.cpp
+    src/tests.cpp)
 set(BINDING_SOURCES python/memb_bindings.cpp)
 
 flatbuffers_generate_c_headers(FLATBUFFER_GENERATED ${FLATBUFFER_SCHEMAS})

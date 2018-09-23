@@ -1,0 +1,10 @@
+namespace memb.wire;
+
+table FullNode {
+    word: string(key);
+    values: [float];
+}
+
+table Full {
+    nodes: [FullNode];
+}

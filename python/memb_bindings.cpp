@@ -1,5 +1,6 @@
 #include "builder.h"
 #include "reader.h"
+#include "compression_strategy.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -69,4 +70,6 @@ PYBIND11_MODULE(_memb, m) {
                     resultShape,
                     resultStrides));
             });
+
+    m.def("available_compression_strategies", &memb::availableCompressionStrategies);
 }

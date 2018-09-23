@@ -1,0 +1,15 @@
+include "kmeans.fbs";
+include "huffman_decoder.fbs";
+
+namespace memb.wire;
+
+table HuffmanNode {
+    word: string(key);
+    compressed_values: [uint8];
+}
+
+table Huffman {
+    nodes: [HuffmanNode];
+    decoder: HuffmanDecoder;
+    clusterizer: KMeansClusterizer;
+}

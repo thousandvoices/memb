@@ -1,7 +1,7 @@
 #pragma once
 
 #include "embeddings_generated.h"
-#include "quantization.h"
+#include "compression_strategy.h"
 
 #include <boost/iostreams/device/mapped_file.hpp>
 
@@ -10,6 +10,9 @@ namespace memb {
 class Reader {
 public:
     Reader(const std::string& filename);
+    Reader(
+        const std::string& filename,
+        std::shared_ptr<CompressionStrategy> compressionStrategy);
 
     size_t dim() const;
 
@@ -21,8 +24,8 @@ public:
 
 private:
     boost::iostreams::mapped_file_source mappedFile_;
-    std::unordered_map<Storage, std::shared_ptr<Quantizer>> quantizationMap_;
-    const Index* flatIndex_;
+    const wire::Index* flatIndex_;
+    std::shared_ptr<CompressedStorage> compressedStorage_;
 };
 
 }

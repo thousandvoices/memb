@@ -1,0 +1,17 @@
+namespace memb.wire;
+
+table UbyteVector {
+    min_value: float;
+    max_value: float;
+    values: [uint8];
+}
+
+table UbyteNode {
+    word: string(key);
+    compressed_values: UbyteVector;
+}
+
+table Ubyte {
+    nodes: [UbyteNode];
+}
+
