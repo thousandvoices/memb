@@ -83,7 +83,8 @@ void KMeansClusterizer::updateCentroids(
 }
 
 
-flatbuffers::Offset<wire::KMeansClusterizer> KMeansClusterizer::save(flatbuffers::FlatBufferBuilder& builder) const
+flatbuffers::Offset<wire::KMeansClusterizer> KMeansClusterizer::save(
+    flatbuffers::FlatBufferBuilder& builder) const
 {
     auto serializedCentroids = builder.CreateVector(centroids_);
     return wire::CreateKMeansClusterizer(builder, serializedCentroids);
