@@ -95,9 +95,6 @@ void HuffmanCompressedStorage::extract(const std::string& word, float* destinati
     auto resultNode = flatStorage_->nodes()->LookupByKey(word.c_str());
     if (resultNode) {
         uint8_t unpackBuffer[dim_];
-        auto compressedValues = std::vector<uint8_t>(
-            resultNode->compressed_values()->begin(),
-            resultNode->compressed_values()->end());
 
         huffmanDecoder_.decode(
             resultNode->compressed_values()->data(),
