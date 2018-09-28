@@ -44,13 +44,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert word vectors to binary format.')
     parser.add_argument('--from', dest='source_filename', required=True)
     parser.add_argument('--to', dest='dest_filename', required=True)
-    parser.add_argument('--quantizer', dest='quantizer', required=True, choices=available_compression_strategies())
+    parser.add_argument('--compression', dest='compression', required=True, choices=available_compression_strategies())
     parser.add_argument('--converter', dest='converter', required=True, choices=FILE_CONVERTERS.keys())
     args = parser.parse_args()
 
     converter = FILE_CONVERTERS[args.converter]
     embedding_df, dim = converter(args.source_filename)
-    builder = Builder(dim, args.quantizer)
+    builder = Builder(dim, args.compression)
 
     for idx, row in embedding_df.iterrows():
         word = str(row.name)
