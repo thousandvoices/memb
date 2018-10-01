@@ -34,14 +34,14 @@ Builder::Builder(size_t dim, const std::string& storageName):
 void Builder::addWord(const std::string& word, const std::vector<float>& embedding)
 {
     if (embedding.size() != dim_) {
-	throw std::runtime_error(boost::str(
-	    boost::format(DIMENSION_MISMATCH_MESSAGE_TEMPLATE) % embedding.size() % word % dim_));
+        throw std::runtime_error(boost::str(
+            boost::format(DIMENSION_MISMATCH_MESSAGE_TEMPLATE) % embedding.size() % word % dim_));
     }
 
     auto insertionResult = addedWords_.insert(word);
     if (!insertionResult.second) {
         throw std::runtime_error(boost::str(
-	    boost::format(DUPLICATE_MESSAGE_TEMPLATE) % word));
+            boost::format(DUPLICATE_MESSAGE_TEMPLATE) % word));
     }
 
     compressor_->add(word, embedding.data(), dim_);

@@ -35,7 +35,7 @@ std::shared_ptr<CompressionStrategy> createCompressionStrategy(wire::Storage sto
 
     if (result == strategies.end()) {
         throw std::runtime_error(boost::str(
-	    boost::format(INVALID_STRATEGY_TEMPLATE) % std::to_string(storage)));
+            boost::format(INVALID_STRATEGY_TEMPLATE) % std::to_string(storage)));
     } else {
         return *result;
     }
