@@ -12,9 +12,9 @@ const std::string INVALID_STRATEGY_TEMPLATE = "Storage strategy %s is not suppor
 
 const std::vector<std::shared_ptr<CompressionStrategy>>& compressionStrategies() {
     static const std::vector<std::shared_ptr<CompressionStrategy>> strategies = {
-        {std::make_shared<FullCompressionStrategy>()},
-        {std::make_shared<UbyteCompressionStrategy>()},
-        {std::make_shared<HuffmanCompressionStrategy>()},
+        std::make_shared<FullCompressionStrategy>(),
+        std::make_shared<UbyteCompressionStrategy>(),
+        std::make_shared<HuffmanCompressionStrategy>(),
     };
 
     return strategies;
