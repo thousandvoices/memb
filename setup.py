@@ -69,5 +69,6 @@ setup(
     cmdclass=dict(build_ext=CMakeBuild),
     packages=['memb'],
     package_dir={'': 'python'},
+    scripts=['tools/converter/memb_converter'],
     zip_safe=False,
 )
