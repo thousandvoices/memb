@@ -1,0 +1,8 @@
+dist: trusty
+sudo: true
+language: python
+python: "3.6"
+install:
+  - tools/development_image/install_deps_linux.sh
+script:
+  - pip3 wheel
