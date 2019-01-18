@@ -1,8 +1,17 @@
+os:
+  - linux
+  - osx
+
 dist: trusty
-sudo: true
+osx_image: xcode10
+
+sudo: required
 language: python
 python: "3.6"
+
 install:
-  - sudo tools/development_image/install_deps_linux.sh
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo tools/development_image/install_deps_linux.sh; fi   
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then tools/development_image/install_deps_darwin.sh; fi   
+
 script:
   - pip3 wheel .
