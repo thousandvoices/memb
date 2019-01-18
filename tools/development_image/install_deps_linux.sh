@@ -17,7 +17,7 @@ tar xfz "${BOOST_PATH}.tar.gz"
 rm "${BOOST_PATH}.tar.gz"
 cd "${BOOST_PATH}"
 ./bootstrap.sh --prefix=/usr/local
-./b2 cxxflags="-fPIC" install --with-test --with-iostreams
+./b2 cxxflags="-fPIC" install --with-test --with-iostreams > /dev/null
 cd /tmp 
 rm -rf "${BOOST_PATH}"
 
