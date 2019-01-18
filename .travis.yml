@@ -1,8 +1,14 @@
 dist: trusty
 sudo: true
 language: python
-python: "3.6"
+
+python:
+  "3.5"
+  "3.6"
+  "3.7"
+
 install:
   - sudo tools/development_image/install_deps_linux.sh
+
 script:
-  - pip3 wheel
+  - pip3 wheel .
