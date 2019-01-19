@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-brew install cmake boost flatbuffers
+brew install python3 cmake boost flatbuffers

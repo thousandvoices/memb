@@ -8,6 +8,7 @@ apt update && apt install -y \
     python3-pip \
     git \
     g++ \
+    g++-7 \
     wget \
     cmake
 
