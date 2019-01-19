@@ -3,6 +3,7 @@
 export BOOST_VERSION="1.64.0"
 export FLATBUFFERS_VERSION="1.9.0"
 
+add-apt-repository ppa:ubuntu-toolchain-r/test
 apt update && apt install -y \
     python3 \
     python3-pip \
