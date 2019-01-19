@@ -8,8 +8,8 @@ function install_or_upgrade {
     fi
 }
 
-REQUIRED_PACKAGES="python3 cmake boost flatbuffers"
+REQUIRED_PACKAGES=(python3 cmake boost flatbuffers)
 
-for package in "${PREQUIRED_PACKAGES[@]}" ; do
+for package in "${REQUIRED_PACKAGES[@]}" ; do
     install_or_upgrade "$package"
 done

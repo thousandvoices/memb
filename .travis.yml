@@ -16,7 +16,7 @@ install:
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then tools/development_image/install_deps_darwin.sh; fi   
 
 script:
-  - pip3 wheel .
+  - tools/development_image/build.sh
 
 notifications:
   email: false
