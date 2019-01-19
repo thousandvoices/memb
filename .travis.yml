@@ -5,9 +5,11 @@ matrix:
       sudo: required
       python: "3.6"
       dist: trusty
+      env: CXX="g++-7"
     - os: osx
       language: generic
       python: "3.6"
+      image: xcode10
 
 install:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sudo tools/development_image/install_deps_linux.sh; fi   
