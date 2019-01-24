@@ -1,47 +1,36 @@
 #!/usr/bin/env python3
 
-import pandas as pd
 import numpy as np
 import argparse
-import csv
+from itertools import islice
+from statistics import median
 
 from memb import Builder, available_compression_strategies
 
 
-def convert_fasttext(filename, max_words):
+def convert(filename, max_words):
+    data = []
     with open(filename) as f:
-        nrows, dim = map(int, f.readline().split())
+        for line in islice(f, max_words):
+            raw_data = line.strip().split(' ')
+            if len(raw_data) > 2:
+                word, *embedding = raw_data
+                try:
+                    data.append((word, np.float32(embedding)))
+                except Exception as e:
+                    print('Expetion while parsing: {}'.format(e))
 
-    df = pd.read_csv(
-        filename,
-        delimiter=' ',
-        header=None,
-        index_col=0,
-        skiprows=1,
-        nrows=max_words,
-        quoting=csv.QUOTE_NONE)
+    orig_data_len = len(data)
 
-    return df, dim
+    dims = [len(embedding) for word, embedding in data]
+    dim = int(median(dims))
+    data = [(word, embedding) for word, embedding in data if len(embedding) == dim]
 
+    discarded_items_count = orig_data_len - len(data)
+    if discarded_items_count > 0:
+        print('{} items are discarded due to inconsistent vector length'.format(discarded_items_count))
 
-def convert_glove(filename, max_words):
-    df = pd.read_csv(
-        filename,
-        delimiter=' ',
-        header=None,
-        index_col=0,
-        nrows=max_words,
-        quoting=csv.QUOTE_NONE)
-
-    dim = len(df.columns)
-
-    return df, dim
-
-
-FILE_CONVERTERS = {
-    'fasttext': convert_fasttext,
-    'glove': convert_glove
-}
+    return data, dim
 
 
 if __name__ == '__main__':
@@ -49,18 +38,15 @@ if __name__ == '__main__':
     parser.add_argument('--from', dest='source_filename', required=True)
     parser.add_argument('--to', dest='dest_filename', required=True)
     parser.add_argument('--compression', dest='compression', required=True, choices=available_compression_strategies())
-    parser.add_argument('--converter', dest='converter', required=True, choices=FILE_CONVERTERS.keys())
     parser.add_argument('--max-words', dest='max_words', type=int)
     args = parser.parse_args()
 
-    converter = FILE_CONVERTERS[args.converter]
-    embedding_df, dim = converter(args.source_filename, args.max_words)
+    embeddings, dim = convert(args.source_filename, args.max_words)
     builder = Builder(dim, args.compression)
 
-    for idx, row in embedding_df.iterrows():
-        word = str(row.name)
+    for word, embedding in embeddings:
         try:
-            builder.add_word(word, np.float32(row.values[:dim]))
+            builder.add_word(word, embedding)
         except Exception as e:
             print('Exception ({}) while trying to add word'.format(e))
 
