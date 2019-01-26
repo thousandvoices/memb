@@ -1,6 +1,7 @@
 #include "kmeans.h"
 
 #include <algorithm>
+#include <unordered_map>
 
 namespace memb {
 
@@ -8,6 +9,7 @@ namespace {
 
 const std::string NOT_FITTED_MESSAGE = "Attempt to use KMeansClusterizer before fitting";
 const size_t MAX_ITERATIONS = 30;
+const double SMALL_CLUSTER_FACTOR = 1024;
 
 } // namespace
 
@@ -31,9 +33,35 @@ void KMeansClusterizer::fit(const std::vector<float>& data)
     }
 
     for (size_t epoch = 0; epoch < MAX_ITERATIONS; ++epoch) {
-        auto assignments = predict(data);
-        updateCentroids(data, assignments);
+        updateCentroids(data, predict(data));
     }
+
+    auto assignments = predict(data);
+    std::unordered_map<uint8_t, size_t> counts;
+    for (auto assignment : assignments) {
+        counts[assignment] += 1;
+    }
+
+    auto maxCount = std::numeric_limits<size_t>::min();
+    for (const auto& count : counts) {
+        maxCount = std::max(count.second, maxCount);
+    }
+
+    auto smallClusterSizeLimit = maxCount / SMALL_CLUSTER_FACTOR;
+    auto centroidsStart = &*centroids_.begin();
+
+    centroids_.erase(
+        std::remove_if(
+            centroids_.begin(),
+            centroids_.end(),
+            [&counts, &centroidsStart, smallClusterSizeLimit](const float& centroid)
+            {
+                return counts[&centroid - centroidsStart] < smallClusterSizeLimit;
+            }),
+        centroids_.end()
+    );
+
+    updateCentroids(data, predict(data));
 }
 
 std::vector<uint8_t> KMeansClusterizer::predict(const std::vector<float>& data) const
@@ -81,7 +109,6 @@ void KMeansClusterizer::updateCentroids(
 
     std::sort(centroids_.begin(), centroids_.end());
 }
-
 
 flatbuffers::Offset<wire::KMeansClusterizer> KMeansClusterizer::save(
     flatbuffers::FlatBufferBuilder& builder) const
