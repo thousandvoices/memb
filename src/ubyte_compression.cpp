@@ -2,8 +2,9 @@
 
 namespace memb {
 
-UbyteCompressor::UbyteCompressor(flatbuffers::FlatBufferBuilder& builder):
-    builder_(builder)
+UbyteCompressor::UbyteCompressor(flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight):
+    builder_(builder),
+    quantizationLevels_(std::min(1 << bitsPerWeight, 255))
 {}
 
 void UbyteCompressor::add(
@@ -20,9 +21,9 @@ void UbyteCompressor::add(
         source,
         source + dim,
         quantizedValues.begin(),
-        [minValue, maxValue](float value)
+        [minValue, maxValue, this](float value)
         {
-            auto floatResult = 255 * (value - minValue) / (maxValue - minValue);
+            auto floatResult = quantizationLevels_ * (value - minValue) / (maxValue - minValue);
             return static_cast<uint8_t>(floatResult);
         });
 
@@ -43,7 +44,7 @@ flatbuffers::Offset<void> UbyteCompressor::finalize()
 
     auto flatNodes = builder_.CreateVectorOfSortedTables(&nodes);
 
-    return CreateUbyte(builder_, flatNodes).Union();
+    return CreateUbyte(builder_, flatNodes, quantizationLevels_).Union();
 }
 
 UbyteCompressedStorage::UbyteCompressedStorage(const void* flatStorage):
@@ -58,23 +59,24 @@ void UbyteCompressedStorage::extract(const std::string& word, float* destination
         auto minValue = ubyteStorage->min_value();
         auto maxValue = ubyteStorage->max_value();
         auto values = ubyteStorage->values();
+        auto quantizationLevels = flatStorage_->quantization_levels();
 
         std::transform(
             values->begin(),
             values->end(),
             destination,
-            [minValue, maxValue](uint8_t value)
+            [minValue, maxValue, quantizationLevels](uint8_t value)
             {
                 auto floatValue = static_cast<float>(value);
-                return minValue + (maxValue - minValue) * floatValue / 255;
+                return minValue + (maxValue - minValue) * floatValue / quantizationLevels;
             });
     }
 }
 
 std::shared_ptr<Compressor> UbyteCompressionStrategy::createCompressor(
-    flatbuffers::FlatBufferBuilder& builder) const
+    flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const
 {
-    return std::make_shared<UbyteCompressor>(builder);
+    return std::make_shared<UbyteCompressor>(builder, bitsPerWeight);
 }
 
 std::shared_ptr<CompressedStorage> UbyteCompressionStrategy::createCompressedStorage(

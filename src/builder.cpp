@@ -17,18 +17,18 @@ const std::string DUPLICATE_MESSAGE_TEMPLATE =
 
 } // namespace
 
-Builder::Builder(size_t dim, wire::Storage storageType):
+Builder::Builder(size_t dim, wire::Storage storageType, size_t bitsPerWeight):
     dim_(dim),
     storageType_(storageType),
-    compressor_(createCompressionStrategy(storageType)->createCompressor(builder_))
+    compressor_(createCompressionStrategy(storageType)->createCompressor(builder_, bitsPerWeight))
 {}
 
-Builder::Builder(size_t dim, const std::string& storageName):
+Builder::Builder(size_t dim, const std::string& storageName, size_t bitsPerWeight):
     dim_(dim)
 {
     auto compressionStrategy = createCompressionStrategy(storageName);
     storageType_ = compressionStrategy->storageType();
-    compressor_ = compressionStrategy->createCompressor(builder_);
+    compressor_ = compressionStrategy->createCompressor(builder_, bitsPerWeight);
 }
 
 void Builder::addWord(const std::string& word, const std::vector<float>& embedding)

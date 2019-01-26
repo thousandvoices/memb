@@ -25,7 +25,9 @@ private:
 
 class HuffmanCompressor : public Compressor {
 public:
-    HuffmanCompressor(flatbuffers::FlatBufferBuilder& builder);
+    HuffmanCompressor(
+        flatbuffers::FlatBufferBuilder& builder,
+        size_t bitsPerWeight);
 
     virtual void add(
         const std::string& word,
@@ -42,12 +44,13 @@ private:
 
     std::vector<WordVector> embeddings_;
     flatbuffers::FlatBufferBuilder& builder_;
+    uint8_t quantizationLevels_;
 };
 
 class HuffmanCompressionStrategy : public CompressionStrategy {
 public:
     virtual std::shared_ptr<Compressor> createCompressor(
-        flatbuffers::FlatBufferBuilder& builder) const override;
+        flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const override;
 
     virtual std::shared_ptr<CompressedStorage> createCompressedStorage(
         const void* flatStorage, size_t dim) const override;

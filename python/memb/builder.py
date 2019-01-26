@@ -2,8 +2,8 @@ import _memb
 
 
 class Builder:
-    def __init__(self, dim, storage_type='full'):
-        self._impl = _memb.Builder(dim, storage_type)
+    def __init__(self, dim, storage_type='huffman', bits_per_weight=4):
+        self._impl = _memb.Builder(dim, storage_type, bits_per_weight)
 
     def add_word(self, word, vector):
         self._impl.add_word(word, vector)

@@ -24,7 +24,7 @@ public:
 class CompressionStrategy {
 public:
     virtual std::shared_ptr<Compressor> createCompressor(
-        flatbuffers::FlatBufferBuilder& builder) const = 0;
+        flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const = 0;
 
     virtual std::shared_ptr<CompressedStorage> createCompressedStorage(
         const void* flatStorage, size_t dim) const = 0;

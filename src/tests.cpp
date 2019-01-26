@@ -24,7 +24,7 @@ void builderTestImpl(wire::Storage storageType, std::shared_ptr<CompressionStrat
         {"a", {1.0, 0.0, -2.0}}
     };
 
-    Builder builder(3, storageType);
+    Builder builder(3, storageType, 8);
     for (const auto& wordVector : wordVectors) {
         builder.addWord(wordVector.word, wordVector.embedding);
     }
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(huffmanBuilderWorksWithIndirectDecoder)
 
 BOOST_AUTO_TEST_CASE(invalidDimensionThrows)
 {
-    Builder builder(15, wire::Storage_Full);
+    Builder builder(15, wire::Storage_Full, 8);
 
     BOOST_CHECK_THROW(
         builder.addWord("the", {0.0, 1.0, 2.0}),
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(invalidDimensionThrows)
 
 BOOST_AUTO_TEST_CASE(duplicateWordThrows)
 {
-    Builder builder(3, wire::Storage_Full);
+    Builder builder(3, wire::Storage_Full, 8);
     builder.addWord("the", {0.0, 1.0, 2.0});
 
     BOOST_CHECK_THROW(

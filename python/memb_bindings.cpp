@@ -10,7 +10,7 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(_memb, m) {
     py::class_<memb::Builder>(m, "Builder")
-        .def(py::init<size_t, const std::string&>())
+        .def(py::init<size_t, const std::string&, size_t>())
         .def(
             "add_word",
             [](memb::Builder& builder, const std::string& word, py::array_t<float, py::array::c_style> values)
