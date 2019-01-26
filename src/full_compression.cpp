@@ -44,7 +44,7 @@ void FullCompressedStorage::extract(const std::string& word, float* destination)
 }
 
 std::shared_ptr<Compressor> FullCompressionStrategy::createCompressor(
-    flatbuffers::FlatBufferBuilder& builder) const
+    flatbuffers::FlatBufferBuilder& builder, size_t /*bitsPerWeight*/) const
 {
     return std::make_shared<FullCompressor>(builder);
 }

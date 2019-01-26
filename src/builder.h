@@ -10,8 +10,8 @@ namespace memb {
 
 class Builder {
 public:
-    Builder(size_t dim, wire::Storage storageType);
-    Builder(size_t dim, const std::string& storageType);
+    Builder(size_t dim, wire::Storage storageType, size_t bitsPerWeight);
+    Builder(size_t dim, const std::string& storageType, size_t bitsPerWeight);
 
     void addWord(const std::string& word, const std::vector<float>& embedding);
     void dump(std::ostream& sink);

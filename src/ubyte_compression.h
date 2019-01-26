@@ -17,7 +17,7 @@ private:
 
 class UbyteCompressor : public Compressor {
 public:
-    UbyteCompressor(flatbuffers::FlatBufferBuilder& builder);
+    UbyteCompressor(flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight);
 
     virtual void add(
         const std::string& word,
@@ -29,12 +29,13 @@ public:
 private:
     std::unordered_map<std::string, flatbuffers::Offset<wire::UbyteVector>> embeddings_;
     flatbuffers::FlatBufferBuilder& builder_;
+    uint8_t quantizationLevels_;
 };
 
 class UbyteCompressionStrategy : public CompressionStrategy {
 public:
     virtual std::shared_ptr<Compressor> createCompressor(
-        flatbuffers::FlatBufferBuilder& builder) const override;
+        flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const override;
 
     virtual std::shared_ptr<CompressedStorage> createCompressedStorage(
         const void* flatStorage, size_t dim) const override;

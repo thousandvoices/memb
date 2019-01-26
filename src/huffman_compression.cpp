@@ -13,13 +13,15 @@ struct QuantizedWordVector {
     std::vector<uint8_t> values;
 };
 
-const size_t QUANTIZATION_LEVELS = 16;
 const size_t CLUSTER_SAMPLE_SIZE = 10000;
 
 } // namespace
 
-HuffmanCompressor::HuffmanCompressor(flatbuffers::FlatBufferBuilder& builder):
-    builder_(builder)
+HuffmanCompressor::HuffmanCompressor(
+        flatbuffers::FlatBufferBuilder& builder,
+        size_t bitsPerWeight):
+    builder_(builder),
+    quantizationLevels_(std::min(1 << bitsPerWeight, 255))
 {}
 
 void HuffmanCompressor::add(
@@ -40,7 +42,7 @@ flatbuffers::Offset<void> HuffmanCompressor::finalize()
         }
     }
 
-    KMeansClusterizer clusterizer(QUANTIZATION_LEVELS);
+    KMeansClusterizer clusterizer(quantizationLevels_);
     clusterizer.fit(valuesSample);
 
     std::vector<QuantizedWordVector> quantizedVectors;
@@ -109,9 +111,9 @@ void HuffmanCompressedStorage::extract(const std::string& word, float* destinati
 }
 
 std::shared_ptr<Compressor> HuffmanCompressionStrategy::createCompressor(
-    flatbuffers::FlatBufferBuilder& builder) const
+    flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const
 {
-    return std::make_shared<HuffmanCompressor>(builder);
+    return std::make_shared<HuffmanCompressor>(builder, bitsPerWeight);
 }
 
 std::shared_ptr<CompressedStorage> HuffmanCompressionStrategy::createCompressedStorage(

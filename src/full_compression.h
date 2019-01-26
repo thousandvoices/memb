@@ -34,7 +34,7 @@ private:
 class FullCompressionStrategy : public CompressionStrategy {
 public:
     virtual std::shared_ptr<Compressor> createCompressor(
-        flatbuffers::FlatBufferBuilder& builder) const override;
+        flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const override;
 
     virtual std::shared_ptr<CompressedStorage> createCompressedStorage(
         const void* flatStorage, size_t dim) const override;
