@@ -1,6 +1,6 @@
 #include "builder.h"
 #include "reader.h"
-#include "huffman_compression.h"
+#include "trained_compression.h"
 
 #include <sstream>
 
@@ -54,28 +54,28 @@ BOOST_AUTO_TEST_CASE(fullBuilderWorks)
     builderTestImpl(wire::Storage_Full, createCompressionStrategy(wire::Storage_Full));
 }
 
-BOOST_AUTO_TEST_CASE(ubyteBuilderWorks)
+BOOST_AUTO_TEST_CASE(uniformBuilderWorks)
 {
-    builderTestImpl(wire::Storage_Ubyte, createCompressionStrategy(wire::Storage_Ubyte));
+    builderTestImpl(wire::Storage_Uniform, createCompressionStrategy(wire::Storage_Uniform));
 }
 
-BOOST_AUTO_TEST_CASE(huffmanBuilderWorks)
+BOOST_AUTO_TEST_CASE(trainedBuilderWorks)
 {
-    builderTestImpl(wire::Storage_Huffman, createCompressionStrategy(wire::Storage_Huffman));
+    builderTestImpl(wire::Storage_Trained, createCompressionStrategy(wire::Storage_Trained));
 }
 
-class TestHuffmanCompressionStrategy : public HuffmanCompressionStrategy {
+class TestTrainedCompressionStrategy : public TrainedCompressionStrategy {
 public:
     virtual std::shared_ptr<CompressedStorage> createCompressedStorage(
         const void* flatIndex, size_t dim) const override
     {
-        return std::make_shared<HuffmanCompressedStorage>(flatIndex, dim, 1);
+        return std::make_shared<TrainedCompressedStorage>(flatIndex, dim, 1);
     }
 };
 
-BOOST_AUTO_TEST_CASE(huffmanBuilderWorksWithIndirectDecoder)
+BOOST_AUTO_TEST_CASE(trainedBuilderWorksWithIndirectDecoder)
 {
-    builderTestImpl(wire::Storage_Huffman, std::make_shared<TestHuffmanCompressionStrategy>());
+    builderTestImpl(wire::Storage_Trained, std::make_shared<TestTrainedCompressionStrategy>());
 }
 
 BOOST_AUTO_TEST_CASE(invalidDimensionThrows)

@@ -1,4 +1,4 @@
-#include "huffman_compression.h"
+#include "trained_compression.h"
 #include "kmeans.h"
 #include "bit_stream.h"
 #include "huffman_encoder.h"
@@ -17,14 +17,14 @@ const size_t CLUSTER_SAMPLE_SIZE = 10000;
 
 } // namespace
 
-HuffmanCompressor::HuffmanCompressor(
+TrainedCompressor::TrainedCompressor(
         flatbuffers::FlatBufferBuilder& builder,
         size_t bitsPerWeight):
     builder_(builder),
     quantizationLevels_(std::min(1 << bitsPerWeight, 255))
 {}
 
-void HuffmanCompressor::add(
+void TrainedCompressor::add(
     const std::string& word,
     const float* source,
     size_t dim)
@@ -32,7 +32,7 @@ void HuffmanCompressor::add(
     embeddings_.push_back({word, std::vector<float>(source, source + dim)});
 }
 
-flatbuffers::Offset<void> HuffmanCompressor::finalize()
+flatbuffers::Offset<void> TrainedCompressor::finalize()
 {
     std::vector<float> valuesSample;
 
@@ -70,29 +70,29 @@ flatbuffers::Offset<void> HuffmanCompressor::finalize()
         compressedVectors[item.word] = values;
     }
 
-    std::vector<flatbuffers::Offset<wire::HuffmanNode>> nodes;
+    std::vector<flatbuffers::Offset<wire::TrainedQuantizedNode>> nodes;
     for (const auto& item : embeddings_) {
         auto word = builder_.CreateString(item.word);
-        nodes.push_back(wire::CreateHuffmanNode(builder_, word, compressedVectors[item.word]));
+        nodes.push_back(wire::CreateTrainedQuantizedNode(builder_, word, compressedVectors[item.word]));
     }
 
     auto flatNodes = builder_.CreateVectorOfSortedTables(&nodes);
 
-    return wire::CreateHuffman(builder_, flatNodes, flatDecoder, flatClusterizer).Union();
+    return wire::CreateTrained(builder_, flatNodes, flatDecoder, flatClusterizer).Union();
 }
 
-HuffmanCompressedStorage::HuffmanCompressedStorage(
+TrainedCompressedStorage::TrainedCompressedStorage(
         const void* flatStorage,
         size_t dim,
         size_t maxDirectDecodeBitLength):
-    flatStorage_(static_cast<const wire::Huffman*>(flatStorage)),
+    flatStorage_(static_cast<const wire::Trained*>(flatStorage)),
     dim_(dim),
     huffmanDecoder_(HuffmanDecoder::load(flatStorage_->decoder()).createTableDecoder(maxDirectDecodeBitLength)),
     centroids_(KMeansClusterizer::load(flatStorage_->clusterizer()).centroids())
 {
 }
 
-void HuffmanCompressedStorage::extract(const std::string& word, float* destination) const
+void TrainedCompressedStorage::extract(const std::string& word, float* destination) const
 {
     auto resultNode = flatStorage_->nodes()->LookupByKey(word.c_str());
     if (resultNode) {
@@ -110,26 +110,26 @@ void HuffmanCompressedStorage::extract(const std::string& word, float* destinati
     }
 }
 
-std::shared_ptr<Compressor> HuffmanCompressionStrategy::createCompressor(
+std::shared_ptr<Compressor> TrainedCompressionStrategy::createCompressor(
     flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const
 {
-    return std::make_shared<HuffmanCompressor>(builder, bitsPerWeight);
+    return std::make_shared<TrainedCompressor>(builder, bitsPerWeight);
 }
 
-std::shared_ptr<CompressedStorage> HuffmanCompressionStrategy::createCompressedStorage(
+std::shared_ptr<CompressedStorage> TrainedCompressionStrategy::createCompressedStorage(
     const void* flatStorage, size_t dim) const
 {
-    return std::make_shared<HuffmanCompressedStorage>(flatStorage, dim);
+    return std::make_shared<TrainedCompressedStorage>(flatStorage, dim);
 }
 
-std::string HuffmanCompressionStrategy::storageName() const
+std::string TrainedCompressionStrategy::storageName() const
 {
-    return "huffman";
+    return "trained";
 }
 
-wire::Storage HuffmanCompressionStrategy::storageType() const
+wire::Storage TrainedCompressionStrategy::storageType() const
 {
-    return wire::Storage_Huffman;
+    return wire::Storage_Trained;
 }
 
 }

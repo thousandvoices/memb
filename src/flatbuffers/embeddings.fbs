@@ -1,13 +1,13 @@
 include "full_compression.fbs";
-include "ubyte_compression.fbs";
-include "huffman_compression.fbs";
+include "uniform_compression.fbs";
+include "trained_compression.fbs";
 
 namespace memb.wire;
 
 union Storage {
     Full,
-    Ubyte,
-    Huffman
+    Uniform,
+    Trained
 }
 
 table Index {

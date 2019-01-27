@@ -1,0 +1,18 @@
+namespace memb.wire;
+
+table UniformQuantizedVector {
+    min_value: float;
+    max_value: float;
+    values: [uint8];
+}
+
+table UniformQuantizedNode {
+    word: string(key);
+    compressed_values: UniformQuantizedVector;
+}
+
+table Uniform {
+    nodes: [UniformQuantizedNode];
+    quantization_levels: uint8;
+}
+

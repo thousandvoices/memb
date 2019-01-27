@@ -1,33 +1,23 @@
 #pragma once
 
-#include "prefix_code.h"
 #include "compression_strategy.h"
-#include "huffman_decoder.h"
+
+#include <unordered_map>
 
 namespace memb {
 
-class HuffmanCompressedStorage : public CompressedStorage {
+class UniformCompressedStorage : public CompressedStorage {
 public:
-    static const size_t DEFAULT_DECODE_TABLE_BIT_LENGTH = 10;
-
-    HuffmanCompressedStorage(
-        const void* flatStorage,
-        size_t dim,
-        size_t maxDirectDecodeBitLength = DEFAULT_DECODE_TABLE_BIT_LENGTH);
+    UniformCompressedStorage(const void* flatStorage);
     virtual void extract(const std::string& word, float* destination) const override;
 
 private:
-    const wire::Huffman* flatStorage_;
-    size_t dim_;
-    HuffmanTableDecoder huffmanDecoder_;
-    std::vector<float> centroids_;
+    const wire::Uniform* flatStorage_;
 };
 
-class HuffmanCompressor : public Compressor {
+class UniformCompressor : public Compressor {
 public:
-    HuffmanCompressor(
-        flatbuffers::FlatBufferBuilder& builder,
-        size_t bitsPerWeight);
+    UniformCompressor(flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight);
 
     virtual void add(
         const std::string& word,
@@ -37,17 +27,12 @@ public:
     virtual flatbuffers::Offset<void> finalize() override;
 
 private:
-    struct WordVector {
-        std::string word;
-        std::vector<float> values;
-    };
-
-    std::vector<WordVector> embeddings_;
+    std::unordered_map<std::string, flatbuffers::Offset<wire::UniformQuantizedVector>> embeddings_;
     flatbuffers::FlatBufferBuilder& builder_;
     uint8_t quantizationLevels_;
 };
 
-class HuffmanCompressionStrategy : public CompressionStrategy {
+class UniformCompressionStrategy : public CompressionStrategy {
 public:
     virtual std::shared_ptr<Compressor> createCompressor(
         flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const override;

@@ -15,8 +15,8 @@ set(FLATBUFFER_SCHEMAS
     src/flatbuffers/kmeans.fbs
     src/flatbuffers/huffman_decoder.fbs
     src/flatbuffers/full_compression.fbs
-    src/flatbuffers/ubyte_compression.fbs
-    src/flatbuffers/huffman_compression.fbs
+    src/flatbuffers/uniform_compression.fbs
+    src/flatbuffers/trained_compression.fbs
     src/flatbuffers/embeddings.fbs)
 
 set(MEMB_SOURCES
@@ -27,9 +27,9 @@ set(MEMB_SOURCES
     src/kmeans.cpp
     src/huffman_encoder.cpp
     src/huffman_decoder.cpp
-    src/huffman_compression.cpp
+    src/trained_compression.cpp
     src/full_compression.cpp
-    src/ubyte_compression.cpp)
+    src/uniform_compression.cpp)
 
 set(MEMB_HEADERS
     src/builder.h
@@ -39,9 +39,9 @@ set(MEMB_HEADERS
     src/kmeans.h
     src/huffman_encoder.h
     src/huffman_decoder.h
-    src/huffman_compression.h
+    src/trained_compression.h
     src/full_compression.h
-    src/ubyte_compression.h)
+    src/uniform_compression.h)
 
 set(TEST_SOURCES
     src/kmeans_tests.cpp

@@ -1,23 +1,33 @@
 #pragma once
 
+#include "prefix_code.h"
 #include "compression_strategy.h"
-
-#include <unordered_map>
+#include "huffman_decoder.h"
 
 namespace memb {
 
-class UbyteCompressedStorage : public CompressedStorage {
+class TrainedCompressedStorage : public CompressedStorage {
 public:
-    UbyteCompressedStorage(const void* flatStorage);
+    static const size_t DEFAULT_DECODE_TABLE_BIT_LENGTH = 10;
+
+    TrainedCompressedStorage(
+        const void* flatStorage,
+        size_t dim,
+        size_t maxDirectDecodeBitLength = DEFAULT_DECODE_TABLE_BIT_LENGTH);
     virtual void extract(const std::string& word, float* destination) const override;
 
 private:
-    const wire::Ubyte* flatStorage_;
+    const wire::Trained* flatStorage_;
+    size_t dim_;
+    HuffmanTableDecoder huffmanDecoder_;
+    std::vector<float> centroids_;
 };
 
-class UbyteCompressor : public Compressor {
+class TrainedCompressor : public Compressor {
 public:
-    UbyteCompressor(flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight);
+    TrainedCompressor(
+        flatbuffers::FlatBufferBuilder& builder,
+        size_t bitsPerWeight);
 
     virtual void add(
         const std::string& word,
@@ -27,12 +37,17 @@ public:
     virtual flatbuffers::Offset<void> finalize() override;
 
 private:
-    std::unordered_map<std::string, flatbuffers::Offset<wire::UbyteVector>> embeddings_;
+    struct WordVector {
+        std::string word;
+        std::vector<float> values;
+    };
+
+    std::vector<WordVector> embeddings_;
     flatbuffers::FlatBufferBuilder& builder_;
     uint8_t quantizationLevels_;
 };
 
-class UbyteCompressionStrategy : public CompressionStrategy {
+class TrainedCompressionStrategy : public CompressionStrategy {
 public:
     virtual std::shared_ptr<Compressor> createCompressor(
         flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const override;

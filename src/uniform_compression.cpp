@@ -1,13 +1,13 @@
-#include "ubyte_compression.h"
+#include "uniform_compression.h"
 
 namespace memb {
 
-UbyteCompressor::UbyteCompressor(flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight):
+UniformCompressor::UniformCompressor(flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight):
     builder_(builder),
     quantizationLevels_(std::min(1 << bitsPerWeight, 255))
 {}
 
-void UbyteCompressor::add(
+void UniformCompressor::add(
     const std::string& word,
     const float* source,
     size_t dim)
@@ -30,35 +30,35 @@ void UbyteCompressor::add(
     auto values = builder_.CreateVector(quantizedValues);
     embeddings_.emplace(
         word,
-        wire::CreateUbyteVector(builder_, minValue, maxValue, values));
+        wire::CreateUniformQuantizedVector(builder_, minValue, maxValue, values));
 }
 
-flatbuffers::Offset<void> UbyteCompressor::finalize()
+flatbuffers::Offset<void> UniformCompressor::finalize()
 {
-    std::vector<flatbuffers::Offset<wire::UbyteNode>> nodes;
+    std::vector<flatbuffers::Offset<wire::UniformQuantizedNode>> nodes;
     for (const auto& item : embeddings_) {
         auto word = builder_.CreateString(item.first);
 
-        nodes.push_back(wire::CreateUbyteNode(builder_, word, item.second));
+        nodes.push_back(wire::CreateUniformQuantizedNode(builder_, word, item.second));
     }
 
     auto flatNodes = builder_.CreateVectorOfSortedTables(&nodes);
 
-    return CreateUbyte(builder_, flatNodes, quantizationLevels_).Union();
+    return CreateUniform(builder_, flatNodes, quantizationLevels_).Union();
 }
 
-UbyteCompressedStorage::UbyteCompressedStorage(const void* flatStorage):
-    flatStorage_(static_cast<const wire::Ubyte*>(flatStorage))
+UniformCompressedStorage::UniformCompressedStorage(const void* flatStorage):
+    flatStorage_(static_cast<const wire::Uniform*>(flatStorage))
 {}
 
-void UbyteCompressedStorage::extract(const std::string& word, float* destination) const
+void UniformCompressedStorage::extract(const std::string& word, float* destination) const
 {
     auto resultNode = flatStorage_->nodes()->LookupByKey(word.c_str());
     if (resultNode) {
-        auto ubyteStorage = resultNode->compressed_values();
-        auto minValue = ubyteStorage->min_value();
-        auto maxValue = ubyteStorage->max_value();
-        auto values = ubyteStorage->values();
+        auto uniformStorage = resultNode->compressed_values();
+        auto minValue = uniformStorage->min_value();
+        auto maxValue = uniformStorage->max_value();
+        auto values = uniformStorage->values();
         auto quantizationLevels = flatStorage_->quantization_levels();
 
         std::transform(
@@ -73,26 +73,26 @@ void UbyteCompressedStorage::extract(const std::string& word, float* destination
     }
 }
 
-std::shared_ptr<Compressor> UbyteCompressionStrategy::createCompressor(
+std::shared_ptr<Compressor> UniformCompressionStrategy::createCompressor(
     flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const
 {
-    return std::make_shared<UbyteCompressor>(builder, bitsPerWeight);
+    return std::make_shared<UniformCompressor>(builder, bitsPerWeight);
 }
 
-std::shared_ptr<CompressedStorage> UbyteCompressionStrategy::createCompressedStorage(
+std::shared_ptr<CompressedStorage> UniformCompressionStrategy::createCompressedStorage(
     const void* flatStorage, size_t /*dim*/) const
 {
-    return std::make_shared<UbyteCompressedStorage>(flatStorage);
+    return std::make_shared<UniformCompressedStorage>(flatStorage);
 }
 
-std::string UbyteCompressionStrategy::storageName() const
+std::string UniformCompressionStrategy::storageName() const
 {
-    return "ubyte";
+    return "uniform";
 }
 
-wire::Storage UbyteCompressionStrategy::storageType() const
+wire::Storage UniformCompressionStrategy::storageType() const
 {
-    return wire::Storage_Ubyte;
+    return wire::Storage_Uniform;
 }
 
 }

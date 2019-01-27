@@ -1,6 +1,6 @@
 #include "full_compression.h"
-#include "ubyte_compression.h"
-#include "huffman_compression.h"
+#include "uniform_compression.h"
+#include "trained_compression.h"
 
 #include <boost/format.hpp>
 
@@ -13,8 +13,8 @@ const std::string INVALID_STRATEGY_TEMPLATE = "Storage strategy %s is not suppor
 const std::vector<std::shared_ptr<CompressionStrategy>>& compressionStrategies() {
     static const std::vector<std::shared_ptr<CompressionStrategy>> strategies = {
         std::make_shared<FullCompressionStrategy>(),
-        std::make_shared<UbyteCompressionStrategy>(),
-        std::make_shared<HuffmanCompressionStrategy>(),
+        std::make_shared<UniformCompressionStrategy>(),
+        std::make_shared<TrainedCompressionStrategy>(),
     };
 
     return strategies;
