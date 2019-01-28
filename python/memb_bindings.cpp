@@ -69,7 +69,12 @@ PYBIND11_MODULE(_memb, m) {
                     2,
                     resultShape,
                     resultStrides));
-            });
+            })
+        .def("keys",
+        [](memb::Reader& reader)
+        {
+            return reader.keys();
+        });
 
     m.def("available_compression_strategies", &memb::availableCompressionStrategies);
 }

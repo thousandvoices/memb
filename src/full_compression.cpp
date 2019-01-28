@@ -43,6 +43,18 @@ void FullCompressedStorage::extract(const std::string& word, float* destination)
     }
 }
 
+std::vector<std::string> FullCompressedStorage::keys() const
+{
+    std::vector<std::string> result;
+    result.reserve(flatStorage_->nodes()->size());
+
+    for (const auto& node : *flatStorage_->nodes()) {
+        result.emplace_back(node->word()->begin(), node->word()->end());
+    }
+
+    return result;
+}
+
 std::shared_ptr<Compressor> FullCompressionStrategy::createCompressor(
     flatbuffers::FlatBufferBuilder& builder, size_t /*bitsPerWeight*/) const
 {

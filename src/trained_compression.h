@@ -15,6 +15,7 @@ public:
         size_t dim,
         size_t maxDirectDecodeBitLength = DEFAULT_DECODE_TABLE_BIT_LENGTH);
     virtual void extract(const std::string& word, float* destination) const override;
+    virtual std::vector<std::string> keys() const override;
 
 private:
     const wire::Trained* flatStorage_;

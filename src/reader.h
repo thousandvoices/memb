@@ -16,6 +16,8 @@ public:
 
     size_t dim() const;
 
+    std::vector<std::string> keys() const;
+
     void wordEmbeddingToBuffer(const std::string& word, float* buffer) const;
     void batchEmbeddingToBuffer(const std::vector<std::string>& words, float* buffer) const;
 

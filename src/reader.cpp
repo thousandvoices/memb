@@ -23,6 +23,11 @@ size_t Reader::dim() const
     return flatIndex_->dim();
 }
 
+std::vector<std::string> Reader::keys() const
+{
+    return compressedStorage_->keys();
+}
+
 void Reader::wordEmbeddingToBuffer(const std::string& word, float* buffer) const
 {
     return compressedStorage_->extract(word, buffer);

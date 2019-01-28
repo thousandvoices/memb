@@ -11,12 +11,32 @@ class BaseReader(ABC):
         else:
             raise TypeError('Key type is not supported')
 
+    def to_keyed_vectors(self):
+        try:
+            from gensim.models import KeyedVectors
+        except ImportError as e:
+            raise ImportError('You must install gensim for KeyedVectors export')
+        
+        keyed_vectors = KeyedVectors(self.dim)
+        words = self.keys()
+        keyed_vectors.add(words, self.batch_embedding(words))
+
+        return keyed_vectors
+
+    @abstractmethod
+    def keys(self):
+        pass
+
     @abstractmethod
     def word_embedding(self, word):
         pass
 
     @abstractmethod
     def batch_embedding(self, words):
+        pass
+
+    @abstractmethod
+    def tokenizer_embedding(self, tokenzer):
         pass
 
 
@@ -28,6 +48,9 @@ class Reader(BaseReader):
     @property
     def dim(self):
         return self._impl.dim()
+    
+    def keys(self):
+        return self._impl.keys()
 
     def word_embedding(self, word):
         return self._impl.word_embedding(word)

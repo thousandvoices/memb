@@ -7,6 +7,7 @@ namespace memb {
 class CompressedStorage {
 public:
     virtual void extract(const std::string& word, float* destination) const = 0;
+    virtual std::vector<std::string> keys() const = 0;
     virtual ~CompressedStorage() {};
 };
 

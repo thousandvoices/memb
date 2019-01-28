@@ -10,6 +10,7 @@ class UniformCompressedStorage : public CompressedStorage {
 public:
     UniformCompressedStorage(const void* flatStorage);
     virtual void extract(const std::string& word, float* destination) const override;
+    virtual std::vector<std::string> keys() const override;
 
 private:
     const wire::Uniform* flatStorage_;

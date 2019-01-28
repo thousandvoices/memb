@@ -23,15 +23,19 @@ void builderTestImpl(wire::Storage storageType, std::shared_ptr<CompressionStrat
         {"of", {0.0, -1.0, 2.0}},
         {"a", {1.0, 0.0, -2.0}}
     };
+    std::vector<std::string> expectedKeys;
 
     Builder builder(3, storageType, 8);
     for (const auto& wordVector : wordVectors) {
         builder.addWord(wordVector.word, wordVector.embedding);
+        expectedKeys.push_back(wordVector.word);
     }
+    std::sort(expectedKeys.begin(), expectedKeys.end());
 
     builder.save(STORAGE_FILENAME);
 
     Reader reader(STORAGE_FILENAME, compression);
+    BOOST_REQUIRE(expectedKeys == reader.keys());
 
     for (const auto& wordVector : wordVectors) {
         auto embedding = reader.wordEmbedding(wordVector.word);

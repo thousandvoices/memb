@@ -110,6 +110,19 @@ void TrainedCompressedStorage::extract(const std::string& word, float* destinati
     }
 }
 
+std::vector<std::string> TrainedCompressedStorage::keys() const
+{
+    std::vector<std::string> result;
+    result.reserve(flatStorage_->nodes()->size());
+
+    for (const auto& node : *flatStorage_->nodes()) {
+        result.emplace_back(node->word()->begin(), node->word()->end());
+    }
+
+    return result;
+}
+
+
 std::shared_ptr<Compressor> TrainedCompressionStrategy::createCompressor(
     flatbuffers::FlatBufferBuilder& builder, size_t bitsPerWeight) const
 {
