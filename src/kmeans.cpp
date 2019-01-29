@@ -9,7 +9,7 @@ namespace {
 
 const std::string NOT_FITTED_MESSAGE = "Attempt to use KMeansClusterizer before fitting";
 const size_t MAX_ITERATIONS = 30;
-const double SMALL_CLUSTER_FACTOR = 1024;
+const double SMALL_CLUSTER_FACTOR = 128;
 
 } // namespace
 
