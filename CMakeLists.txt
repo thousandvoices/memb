@@ -2,6 +2,7 @@ project(mapped_embeddings)
 cmake_minimum_required(VERSION 3.9)
 
 set(CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake_modules)
+set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(pybind11)
 
@@ -9,7 +10,7 @@ find_package(flatbuffers REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.64 COMPONENTS iostreams unit_test_framework REQUIRED)
 
-set(CMAKE_CXX_FLAGS "-std=c++14 -fPIC -Werror")
+set(CMAKE_CXX_FLAGS "-fPIC -Werror")
 
 set(FLATBUFFER_SCHEMAS
     src/flatbuffers/kmeans.fbs
