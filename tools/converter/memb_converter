@@ -34,12 +34,45 @@ def convert(filename, max_words):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Convert word vectors to binary format.')
-    parser.add_argument('--from', dest='source_filename', required=True)
-    parser.add_argument('--to', dest='dest_filename', required=True)
-    parser.add_argument('--quantization', dest='quantization', required=True, choices=available_compression_strategies())
-    parser.add_argument('--bits-per-weight', dest='bits_per_weight', type=int, default=4)
-    parser.add_argument('--max-words', dest='max_words', type=int)
+    parser = argparse.ArgumentParser(description='Convert word vectors to quantized binary format')
+    
+    parser.add_argument(
+        '--from',
+        dest='source_filename',
+        required=True,
+        help='Source filename')
+
+    parser.add_argument(
+        '--to',
+        dest='dest_filename',
+        required=True,
+        help='Destination filename')
+
+    parser.add_argument(
+        '--quantization',
+        dest='quantization',
+        required=True,
+        choices=available_compression_strategies(),
+        help='''Quantization strategy to use. It is highly recommended to use
+            trained quantization here, because it is known to produce smallest
+            and best in terms of quality results.''')
+
+    parser.add_argument(
+        '--bits-per-weight',
+        dest='bits_per_weight',
+        type=int,
+        default=4,
+        help='''Number of bits used to represent single weight.
+            If this value is beyond range accepted by quantization strategy,
+            closest supported value will be used instead.''')
+
+    parser.add_argument(
+        '--max-words',
+        dest='max_words',
+        type=int,
+        help='''Maximum number of words to put into destination file.
+            Leave the parameter empty to convert all words.''')
+
     args = parser.parse_args()
 
     embeddings, dim = convert(args.source_filename, args.max_words)
