@@ -25,9 +25,9 @@ https://arxiv.org/pdf/1510.00149.pdf). Эксперименты показыва
 * И даже при переходе к 1 биту на вес модели сохраняют значительную часть предсказательной силы: корреляция падает всего
 на пять процентов, точность при поиске аналогий — в 2 раза.
 <p float="left">
-  <img src="https://github.com/thousandvoices/memb/raw/add_readme/docs/images/spearman.png" alt="spearman" width="400" />
-  <img src="https://github.com/thousandvoices/memb/raw/add_readme/docs/images/analogy.png" alt="analogy" width="400" />
-  <img src="https://github.com/thousandvoices/memb/raw/add_readme/docs/images/sizes.png" alt="size" width="400" />
+  <img src="https://github.com/thousandvoices/memb/raw/master/docs/images/spearman.png" alt="spearman" width="400" />
+  <img src="https://github.com/thousandvoices/memb/raw/master/docs/images/analogy.png" alt="analogy" width="400" />
+  <img src="https://github.com/thousandvoices/memb/raw/master/docs/images/sizes.png" alt="size" width="400" />
 </p>
 
 Опыты с англоязычными моделями показывают, что нейросети, обученные с векторами, сжатыми до 4 бит, достигают
@@ -75,7 +75,7 @@ union = ReadersUnion(readers, mode='concatenate')
 print(union['the'])
 ```
 
-Метод [`tokenizer_embedding`](https://github.com/thousandvoices/memb/blob/master/python/memb/reader.py#L61)
+Метод [`tokenizer_embedding`](https://github.com/thousandvoices/memb/blob/master/python/memb/reader.py#L91)
 создает из объекта класса [`keras.preprocessing.text.Tokenizer`](https://keras.io/preprocessing/text/) матрицу,
 которую можно передать в качестве весов в слой `Embedding`.
 ```python
@@ -97,7 +97,7 @@ embedding_layer = Embedding(
 ```
 
 `Reader` можно экспортировать в объект [`KeyedVectors`](https://radimrehurek.com/gensim/models/keyedvectors.html),
-вызвав метод [`to_keyed_vectors`](https://github.com/thousandvoices/memb/blob/master/python/memb/reader.py#L14).
+вызвав метод [`to_keyed_vectors`](https://github.com/thousandvoices/memb/blob/master/python/memb/reader.py#L19).
 Разумеется, для того, чтобы он работал, нужно установить gensim.
 
 ## Сборка из исходников
