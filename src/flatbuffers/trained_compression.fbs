@@ -5,11 +5,12 @@ namespace memb.wire;
 
 table TrainedQuantizedNode {
     word: string(key);
-    compressed_values: [uint8];
+    offset: uint32;
 }
 
 table Trained {
     nodes: [TrainedQuantizedNode];
+    compressed_values: [uint8];
     decoder: HuffmanDecoder;
     clusterizer: KMeansClusterizer;
 }

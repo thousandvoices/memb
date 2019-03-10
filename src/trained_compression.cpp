@@ -64,21 +64,22 @@ flatbuffers::Offset<void> TrainedCompressor::finalize()
     auto flatDecoder = encoder.createDecoder().save(builder_);
     auto flatClusterizer = clusterizer.save(builder_);
 
-    std::unordered_map<std::string, flatbuffers::Offset<flatbuffers::Vector<uint8_t>>> compressedVectors;
-    for (const auto& item : quantizedVectors) {
-        auto values = builder_.CreateVector(encoder.encode(item.values));
-        compressedVectors[item.word] = values;
-    }
-
     std::vector<flatbuffers::Offset<wire::TrainedQuantizedNode>> nodes;
-    for (const auto& item : embeddings_) {
+    std::vector<uint8_t> compressedValues;
+
+    for (const auto& item : quantizedVectors) {
+        auto offset = compressedValues.size();
+        auto encodedValues = encoder.encode(item.values);
+        compressedValues.insert(
+            compressedValues.end(), encodedValues.begin(), encodedValues.end());
         auto word = builder_.CreateString(item.word);
-        nodes.push_back(wire::CreateTrainedQuantizedNode(builder_, word, compressedVectors[item.word]));
+        nodes.push_back(wire::CreateTrainedQuantizedNode(builder_, word, offset));
     }
 
+    auto flatCompressedValues = builder_.CreateVector(compressedValues);
     auto flatNodes = builder_.CreateVectorOfSortedTables(&nodes);
 
-    return wire::CreateTrained(builder_, flatNodes, flatDecoder, flatClusterizer).Union();
+    return wire::CreateTrained(builder_, flatNodes, flatCompressedValues, flatDecoder, flatClusterizer).Union();
 }
 
 TrainedCompressedStorage::TrainedCompressedStorage(
@@ -98,9 +99,10 @@ void TrainedCompressedStorage::extract(const std::string& word, float* destinati
     if (resultNode) {
         uint8_t unpackBuffer[dim_];
 
+        size_t offset = resultNode->offset();
         huffmanDecoder_.decode(
-            resultNode->compressed_values()->data(),
-            resultNode->compressed_values()->size(),
+            flatStorage_->compressed_values()->data() + offset,
+            flatStorage_->compressed_values()->size() - offset,
             unpackBuffer,
             dim_);
 
