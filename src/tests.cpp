@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(missingFileThrows)
 {
     BOOST_CHECK_THROW(
         Reader("missing.bin"),
-        std::runtime_error);
+        std::exception);
 }
 
 BOOST_AUTO_TEST_CASE(invalidFileThrows)
