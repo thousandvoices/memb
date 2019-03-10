@@ -3,6 +3,7 @@
 #include "trained_compression.h"
 
 #include <sstream>
+#include <fstream>
 
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/unit_test.hpp>
@@ -98,6 +99,27 @@ BOOST_AUTO_TEST_CASE(duplicateWordThrows)
 
     BOOST_CHECK_THROW(
         builder.addWord("the", {2.0, 1.0, 2.0}),
+        std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(missingFileThrows)
+{
+    BOOST_CHECK_THROW(
+        Reader("missing.bin"),
+        std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(invalidFileThrows)
+{
+    static const std::string INVALID_FILE = "invalid.bin";
+
+    {
+        std::ofstream f(INVALID_FILE);
+        f << "1";
+    }
+
+    BOOST_CHECK_THROW(
+        auto reader = Reader(INVALID_FILE),
         std::runtime_error);
 }
 

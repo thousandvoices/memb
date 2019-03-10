@@ -2,10 +2,23 @@
 
 namespace memb {
 
+namespace {
+
+const wire::Index* getIndexSafe(const void* buffer)
+{
+    if (!wire::IndexBufferHasIdentifier(buffer)) {
+        throw std::runtime_error("File format verification failed");
+    }
+
+    return wire::GetIndex(buffer);
+}
+
+} // namespace
+
 Reader::Reader(const std::string& filename,
                std::shared_ptr<CompressionStrategy> compressionStrategy):
     mappedFile_(filename),
-    flatIndex_(wire::GetIndex(mappedFile_.data())),
+    flatIndex_(getIndexSafe(mappedFile_.data())),
     compressedStorage_(compressionStrategy->createCompressedStorage(
         flatIndex_->storage(), flatIndex_->dim()))
 {
@@ -13,7 +26,7 @@ Reader::Reader(const std::string& filename,
 
 Reader::Reader(const std::string& filename):
     mappedFile_(filename),
-    flatIndex_(wire::GetIndex(mappedFile_.data())),
+    flatIndex_(getIndexSafe(mappedFile_.data())),
     compressedStorage_(createCompressionStrategy(flatIndex_->storage_type())->createCompressedStorage(
         flatIndex_->storage(), flatIndex_->dim()))
 {}

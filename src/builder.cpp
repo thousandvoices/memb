@@ -54,7 +54,7 @@ void Builder::dump(std::ostream& sink)
     indexBuilder.add_dim(dim_);
     indexBuilder.add_storage_type(storageType_);
     indexBuilder.add_storage(storage);
-    builder_.Finish(indexBuilder.Finish());
+    wire::FinishIndexBuffer(builder_, indexBuilder.Finish());
 
     sink << std::string(
         reinterpret_cast<char*>(builder_.GetBufferPointer()),
