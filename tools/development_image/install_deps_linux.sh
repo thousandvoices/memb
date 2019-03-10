@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export BOOST_VERSION="1.64.0"
+export BOOST_VERSION="1.67.0"
 export FLATBUFFERS_VERSION="1.9.0"
 
 add-apt-repository ppa:ubuntu-toolchain-r/test -y
