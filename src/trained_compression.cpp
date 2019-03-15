@@ -107,7 +107,7 @@ void TrainedCompressedStorage::extract(const std::string& word, float* destinati
             dim_);
 
         for (size_t i = 0; i < dim_; ++i) {
-            *(destination + i) = centroids_[unpackBuffer[i]];
+            destination[i] = centroids_[unpackBuffer[i]];
         }
     }
 }

@@ -125,7 +125,7 @@ void HuffmanTableDecoder::decode(
             unpackedValue = entry.key;
             bitsToPull = maxDirectDecodeBitLength_ - indirectEntry.maxBitsCount + entry.bitsCount;
         }
-        *(destination + i) = unpackedValue;
+        destination[i] = unpackedValue;
     }
 }
 
