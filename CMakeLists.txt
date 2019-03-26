@@ -11,7 +11,9 @@ find_package(flatbuffers REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.67 COMPONENTS iostreams unit_test_framework REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+if (NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+endif()
 
 set(FLATBUFFER_SCHEMAS
     src/flatbuffers/kmeans.fbs

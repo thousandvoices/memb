@@ -1,5 +1,7 @@
 #include "bit_stream.h"
 
+#include <algorithm>
+
 namespace memb {
 
 BitStream::BitStream():

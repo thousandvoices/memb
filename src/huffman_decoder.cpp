@@ -1,5 +1,4 @@
 #include "huffman_decoder.h"
-#include "bit_stream.h"
 
 namespace memb {
 
@@ -100,32 +99,28 @@ HuffmanTableDecoder::HuffmanTableDecoder(
     }
 }
 
-void HuffmanTableDecoder::decode(
-    const uint8_t* source,
-    size_t sourceSize,
-    uint8_t* destination,
-    size_t unpackCount) const
+HuffmanTableDecoder::Iterator HuffmanTableDecoder::decode(
+    const uint8_t* source, size_t sourceSize) const
 {
-    BitStreamReader reader(source, source + sourceSize);
+    return Iterator{
+        this, BitStreamReader(source, source + sourceSize), maxDirectDecodeBitLength_};
+}
 
-    size_t bitsToPull = maxDirectDecodeBitLength_;
-    for (size_t i = 0; i < unpackCount; ++i) {
-        uint8_t unpackedValue;
-        size_t offset = reader.pull(bitsToPull) & decodeTableBitMask_;
+uint8_t HuffmanTableDecoder::Iterator::next()
+{
+    size_t offset = reader.pull(bitsToPull) & decoder->decodeTableBitMask_;
 
-        if (offset < decodeTable_.size()) {
-            auto entry = decodeTable_[offset];
-            unpackedValue = entry.key;
-            bitsToPull = entry.bitsCount;
-        } else {
-            auto indirectEntry = indirectOffsetsTable_[offset - decodeTable_.size()];
-            size_t bitMask = (1U << indirectEntry.maxBitsCount) - 1;
-            auto indirectKey = reader.pull(indirectEntry.maxBitsCount) & bitMask;
-            auto entry = indirectDecodeTable_[indirectEntry.offset + indirectKey];
-            unpackedValue = entry.key;
-            bitsToPull = maxDirectDecodeBitLength_ - indirectEntry.maxBitsCount + entry.bitsCount;
-        }
-        destination[i] = unpackedValue;
+    if (offset < decoder->decodeTable_.size()) {
+        auto entry = decoder->decodeTable_[offset];
+        bitsToPull = entry.bitsCount;
+        return entry.key;
+    } else {
+        auto indirectEntry = decoder->indirectOffsetsTable_[offset - decoder->decodeTable_.size()];
+        size_t bitMask = (1U << indirectEntry.maxBitsCount) - 1;
+        auto indirectKey = reader.pull(indirectEntry.maxBitsCount) & bitMask;
+        auto entry = decoder->indirectDecodeTable_[indirectEntry.offset + indirectKey];
+        bitsToPull = decoder->maxDirectDecodeBitLength_ - indirectEntry.maxBitsCount + entry.bitsCount;
+        return entry.key;
     }
 }
 

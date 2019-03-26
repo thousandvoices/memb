@@ -123,19 +123,15 @@ void TrainedCompressedStorage::extract(const std::string& word, float* destinati
         });
 
     if (strcmp(flatStorage_->packed_words()->data() + *resultIt, word.c_str()) == 0) {
-        uint8_t unpackBuffer[dim_];
-
         size_t offset = flatStorage_->value_offsets()->Get(
             resultIt - flatStorage_->word_offsets()->begin());
 
-        huffmanDecoder_.decode(
+        auto decoderIter = huffmanDecoder_.decode(
             flatStorage_->packed_values()->data() + offset,
-            flatStorage_->packed_values()->size() - offset,
-            unpackBuffer,
-            dim_);
+            flatStorage_->packed_values()->size() - offset);
 
         for (size_t i = 0; i < dim_; ++i) {
-            destination[i] = centroids_[unpackBuffer[i]];
+            destination[i] = centroids_[decoderIter.next()];
         }
     }
 }
