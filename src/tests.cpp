@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(invalidFileThrows)
 
     {
         std::ofstream f(INVALID_FILE);
-        f << "1";
+        f << "0123456789";
     }
 
     BOOST_CHECK_THROW(

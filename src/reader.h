@@ -25,6 +25,8 @@ public:
     std::vector<float> batchEmbedding(const std::vector<std::string>& words) const;
 
 private:
+    const wire::Index* getIndexChecked() const;
+
     boost::iostreams::mapped_file_source mappedFile_;
     const wire::Index* flatIndex_;
     std::shared_ptr<CompressedStorage> compressedStorage_;

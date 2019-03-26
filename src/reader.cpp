@@ -2,23 +2,10 @@
 
 namespace memb {
 
-namespace {
-
-const wire::Index* getIndexSafe(const void* buffer)
-{
-    if (!wire::IndexBufferHasIdentifier(buffer)) {
-        throw std::runtime_error("File format verification failed");
-    }
-
-    return wire::GetIndex(buffer);
-}
-
-} // namespace
-
 Reader::Reader(const std::string& filename,
                std::shared_ptr<CompressionStrategy> compressionStrategy):
     mappedFile_(filename),
-    flatIndex_(getIndexSafe(mappedFile_.data())),
+    flatIndex_(getIndexChecked()),
     compressedStorage_(compressionStrategy->createCompressedStorage(
         flatIndex_->storage(), flatIndex_->dim()))
 {
@@ -26,7 +13,7 @@ Reader::Reader(const std::string& filename,
 
 Reader::Reader(const std::string& filename):
     mappedFile_(filename),
-    flatIndex_(getIndexSafe(mappedFile_.data())),
+    flatIndex_(getIndexChecked()),
     compressedStorage_(createCompressionStrategy(flatIndex_->storage_type())->createCompressedStorage(
         flatIndex_->storage(), flatIndex_->dim()))
 {}
@@ -68,6 +55,15 @@ std::vector<float> Reader::batchEmbedding(const std::vector<std::string>& words)
     batchEmbeddingToBuffer(words, result.data());
 
     return result;
+}
+
+const wire::Index* Reader::getIndexChecked() const
+{
+    if (mappedFile_.size() < 8 || !wire::IndexBufferHasIdentifier(mappedFile_.data())) {
+        throw std::runtime_error("File format verification failed");
+    }
+
+    return wire::GetIndex(mappedFile_.data());
 }
 
 }
