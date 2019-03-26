@@ -3,14 +3,11 @@ include "huffman_decoder.fbs";
 
 namespace memb.wire;
 
-table TrainedQuantizedNode {
-    word: string(key);
-    offset: uint32;
-}
-
 table Trained {
-    nodes: [TrainedQuantizedNode];
-    compressed_values: [uint8];
+    word_offsets: [uint32];
+    value_offsets: [uint32];
+    packed_words: string;
+    packed_values: [uint8];
     decoder: HuffmanDecoder;
     clusterizer: KMeansClusterizer;
 }

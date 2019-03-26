@@ -13,6 +13,11 @@ struct QuantizedWordVector {
     std::vector<uint8_t> values;
 };
 
+struct StorageNode {
+    std::string word;
+    uint32_t offset;
+};
+
 const size_t CLUSTER_SAMPLE_SIZE = 10000;
 
 } // namespace
@@ -37,49 +42,62 @@ flatbuffers::Offset<void> TrainedCompressor::finalize()
     std::vector<float> valuesSample;
 
     for (size_t i = 0; i < std::min(CLUSTER_SAMPLE_SIZE, embeddings_.size()); ++i) {
-        for (auto value : embeddings_[i].values) {
-            valuesSample.push_back(value);
-        }
+        valuesSample.insert(
+            valuesSample.end(), embeddings_[i].values.begin(), embeddings_[i].values.end());
     }
 
+    HuffmanEncoderBuilder encoderBuilder;
+    std::vector<QuantizedWordVector> quantizedVectors;
     KMeansClusterizer clusterizer(quantizationLevels_);
     clusterizer.fit(valuesSample);
 
-    std::vector<QuantizedWordVector> quantizedVectors;
-    std::transform(
-        embeddings_.begin(),
-        embeddings_.end(),
-        std::back_inserter(quantizedVectors),
-        [&clusterizer](const WordVector& wordVector)
-        {
-            return QuantizedWordVector{wordVector.word, clusterizer.predict(wordVector.values)};
-        });
-
-    HuffmanEncoderBuilder encoderBuilder;
-    for (auto wordVector : quantizedVectors) {
-        encoderBuilder.updateFrequencies(wordVector.values);
+    for (const auto& wordVector : embeddings_) {
+        auto quantizedWordVector = clusterizer.predict(wordVector.values);
+        encoderBuilder.updateFrequencies(quantizedWordVector);
+        quantizedVectors.push_back({wordVector.word, quantizedWordVector});
     }
+
     auto encoder = encoderBuilder.createEncoder();
 
-    auto flatDecoder = encoder.createDecoder().save(builder_);
-    auto flatClusterizer = clusterizer.save(builder_);
-
-    std::vector<flatbuffers::Offset<wire::TrainedQuantizedNode>> nodes;
-    std::vector<uint8_t> compressedValues;
+    std::vector<StorageNode> nodes;
+    std::vector<uint8_t> packedValues;
 
     for (const auto& item : quantizedVectors) {
-        auto offset = compressedValues.size();
+        auto offset = packedValues.size();
         auto encodedValues = encoder.encode(item.values);
-        compressedValues.insert(
-            compressedValues.end(), encodedValues.begin(), encodedValues.end());
-        auto word = builder_.CreateString(item.word);
-        nodes.push_back(wire::CreateTrainedQuantizedNode(builder_, word, offset));
+        packedValues.insert(
+            packedValues.end(), encodedValues.begin(), encodedValues.end());
+        nodes.push_back(StorageNode{item.word, static_cast<uint32_t>(offset)});
     }
 
-    auto flatCompressedValues = builder_.CreateVector(compressedValues);
-    auto flatNodes = builder_.CreateVectorOfSortedTables(&nodes);
+    std::sort(
+        nodes.begin(),
+        nodes.end(),
+        [](const StorageNode& lhs, const StorageNode& rhs)
+        {
+            return lhs.word < rhs.word;
+        });
 
-    return wire::CreateTrained(builder_, flatNodes, flatCompressedValues, flatDecoder, flatClusterizer).Union();
+    std::string packedWords;
+    std::vector<uint32_t> wordOffsets;
+    std::vector<uint32_t> valueOffsets;
+
+    for (const auto& node : nodes) {
+        wordOffsets.push_back(packedWords.size());
+        valueOffsets.push_back(node.offset);
+
+        packedWords.insert(packedWords.size(), node.word.c_str(), node.word.size() + 1);
+    }
+
+    return wire::CreateTrained(
+        builder_,
+        builder_.CreateVector(wordOffsets),
+        builder_.CreateVector(valueOffsets),
+        builder_.CreateString(packedWords),
+        builder_.CreateVector(packedValues),
+        encoder.createDecoder().save(builder_),
+        clusterizer.save(builder_)
+    ).Union();
 }
 
 TrainedCompressedStorage::TrainedCompressedStorage(
@@ -90,19 +108,29 @@ TrainedCompressedStorage::TrainedCompressedStorage(
     dim_(dim),
     huffmanDecoder_(HuffmanDecoder::load(flatStorage_->decoder()).createTableDecoder(maxDirectDecodeBitLength)),
     centroids_(KMeansClusterizer::load(flatStorage_->clusterizer()).centroids())
-{
-}
+{}
 
 void TrainedCompressedStorage::extract(const std::string& word, float* destination) const
 {
-    auto resultNode = flatStorage_->nodes()->LookupByKey(word.c_str());
-    if (resultNode) {
+    auto wordData = flatStorage_->packed_words()->data();
+    auto resultIt = std::lower_bound(
+        flatStorage_->word_offsets()->begin(),
+        flatStorage_->word_offsets()->end(),
+        word.c_str(),
+        [wordData](uint32_t offset, const char* word)
+        {
+            return strcmp(wordData + offset, word) < 0;
+        });
+
+    if (strcmp(flatStorage_->packed_words()->data() + *resultIt, word.c_str()) == 0) {
         uint8_t unpackBuffer[dim_];
 
-        size_t offset = resultNode->offset();
+        size_t offset = flatStorage_->value_offsets()->Get(
+            resultIt - flatStorage_->word_offsets()->begin());
+
         huffmanDecoder_.decode(
-            flatStorage_->compressed_values()->data() + offset,
-            flatStorage_->compressed_values()->size() - offset,
+            flatStorage_->packed_values()->data() + offset,
+            flatStorage_->packed_values()->size() - offset,
             unpackBuffer,
             dim_);
 
@@ -115,10 +143,11 @@ void TrainedCompressedStorage::extract(const std::string& word, float* destinati
 std::vector<std::string> TrainedCompressedStorage::keys() const
 {
     std::vector<std::string> result;
-    result.reserve(flatStorage_->nodes()->size());
+    result.reserve(flatStorage_->word_offsets()->size());
+    auto wordData = flatStorage_->packed_words()->data();
 
-    for (const auto& node : *flatStorage_->nodes()) {
-        result.emplace_back(node->word()->begin(), node->word()->end());
+    for (auto wordOffset : *flatStorage_->word_offsets()) {
+        result.emplace_back(reinterpret_cast<const char*>(wordData + wordOffset));
     }
 
     return result;

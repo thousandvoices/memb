@@ -22,7 +22,10 @@ void builderTestImpl(wire::Storage storageType, std::shared_ptr<CompressionStrat
     std::vector<WordVector> wordVectors = {
         {"the", {0.0, 1.0, 2.0}},
         {"of", {0.0, -1.0, 2.0}},
-        {"a", {1.0, 0.0, -2.0}}
+        {"th", {2.0, 0.0, 1.0}},
+        {"a", {1.0, 0.0, -2.0}},
+        {"tho", {2.0, 0.0, -1.0}},
+        {"abc", {-2.0, 0.0, 1.0}},
     };
     std::vector<std::string> expectedKeys;
 
