@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 export BOOST_VERSION="1.67.0"
 export FLATBUFFERS_VERSION="1.9.0"
 
