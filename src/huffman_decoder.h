@@ -23,13 +23,16 @@ public:
         const std::vector<uint32_t>& sizeOffsets,
         size_t maxDirectDecodeBitLength);
 
-    friend struct Iterator;
-    struct Iterator {
+    friend class Iterator;
+    class Iterator {
+    public:
+        Iterator(const HuffmanTableDecoder* decoder, BitStreamReader reader, size_t bitsToPull);
         uint8_t next();
 
-        const HuffmanTableDecoder* decoder;
-        BitStreamReader reader;
-        size_t bitsToPull;
+    private:
+        const HuffmanTableDecoder* decoder_;
+        BitStreamReader reader_;
+        size_t bitsToPull_;
     };
 
     Iterator decode(const uint8_t* source, size_t sourceSize) const;
