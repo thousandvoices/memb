@@ -99,36 +99,29 @@ HuffmanTableDecoder::HuffmanTableDecoder(
     }
 }
 
-HuffmanTableDecoder::Iterator::Iterator(
-    const HuffmanTableDecoder* decoder, BitStreamReader reader, size_t bitsToPull):
-    decoder_(decoder),
-    reader_(std::move(reader)),
-    bitsToPull_(bitsToPull)
-{}
-
-uint8_t HuffmanTableDecoder::Iterator::next()
-{
-    size_t offset = reader_.pull(bitsToPull_) & decoder_->decodeTableBitMask_;
-
-    if (offset < decoder_->decodeTable_.size()) {
-        auto entry = decoder_->decodeTable_[offset];
-        bitsToPull_ = entry.bitsCount;
-        return entry.key;
-    } else {
-        auto indirectEntry = decoder_->indirectOffsetsTable_[offset - decoder_->decodeTable_.size()];
-        size_t bitMask = (1U << indirectEntry.maxBitsCount) - 1;
-        auto indirectKey = reader_.pull(indirectEntry.maxBitsCount) & bitMask;
-        auto entry = decoder_->indirectDecodeTable_[indirectEntry.offset + indirectKey];
-        bitsToPull_ = decoder_->maxDirectDecodeBitLength_ - indirectEntry.maxBitsCount + entry.bitsCount;
-        return entry.key;
-    }
-}
-
-HuffmanTableDecoder::Iterator HuffmanTableDecoder::decode(
+HuffmanTableDecoder::DecodeState HuffmanTableDecoder::decode(
     const uint8_t* source, size_t sourceSize) const
 {
-    return Iterator(
-        this, BitStreamReader(source, source + sourceSize), maxDirectDecodeBitLength_);
+    return DecodeState{
+        BitStreamReader(source, source + sourceSize), maxDirectDecodeBitLength_};
+}
+
+uint8_t HuffmanTableDecoder::next(DecodeState& state) const
+{
+    size_t offset = state.reader.pull(state.bitsToPull) & decodeTableBitMask_;
+
+    if (offset < decodeTable_.size()) {
+        auto entry = decodeTable_[offset];
+        state.bitsToPull = entry.bitsCount;
+        return entry.key;
+    } else {
+        auto indirectEntry = indirectOffsetsTable_[offset - decodeTable_.size()];
+        size_t bitMask = (1U << indirectEntry.maxBitsCount) - 1;
+        auto indirectKey = state.reader.pull(indirectEntry.maxBitsCount) & bitMask;
+        auto entry = indirectDecodeTable_[indirectEntry.offset + indirectKey];
+        state.bitsToPull = maxDirectDecodeBitLength_ - indirectEntry.maxBitsCount + entry.bitsCount;
+        return entry.key;
+    }
 }
 
 uint16_t HuffmanTableDecoder::baseOffset(const std::unordered_map<uint8_t, PrefixCode>& codes, uint8_t key)

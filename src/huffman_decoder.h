@@ -18,24 +18,18 @@ std::unordered_map<uint8_t, PrefixCode> createCanonicalPrefixCodes(
 
 class HuffmanTableDecoder {
 public:
+    struct DecodeState {
+        BitStreamReader reader;
+        size_t bitsToPull;
+    };
+
     HuffmanTableDecoder(
         const std::vector<uint8_t>& keys,
         const std::vector<uint32_t>& sizeOffsets,
         size_t maxDirectDecodeBitLength);
 
-    friend class Iterator;
-    class Iterator {
-    public:
-        Iterator(const HuffmanTableDecoder* decoder, BitStreamReader reader, size_t bitsToPull);
-        uint8_t next();
-
-    private:
-        const HuffmanTableDecoder* decoder_;
-        BitStreamReader reader_;
-        size_t bitsToPull_;
-    };
-
-    Iterator decode(const uint8_t* source, size_t sourceSize) const;
+    DecodeState decode(const uint8_t* source, size_t sourceSize) const;
+    uint8_t next(DecodeState& state) const;
 
 private:
     uint16_t baseOffset(const std::unordered_map<uint8_t, PrefixCode>& codes, uint8_t key);
