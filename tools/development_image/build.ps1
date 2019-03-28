@@ -1,4 +1,4 @@
-$erroractionpreference = "stop"
+$ErrorActionPreference = "Stop"
 
 pip install wheel
 pip wheel $env:APPVEYOR_BUILD_FOLDER

@@ -11,7 +11,6 @@ void FullCompressor::add(
     const float* source,
     size_t dim)
 {
-    qwerty;
     embeddings_.emplace(
         word,
         builder_.CreateVector(source, dim));
