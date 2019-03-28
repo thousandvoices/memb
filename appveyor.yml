@@ -1,0 +1,11 @@
+environment:
+  matrix:
+    - PYTHON: "C:\\Python36-x64"
+      PYTHON_VERSION: "3.6.8"
+      PYTHON_ARCH: "64"
+
+install:
+  - ECHO "Filesystem root:"
+  - ps: "ls \"C:/\""
+  - echo %PATH%
+  - python --version
