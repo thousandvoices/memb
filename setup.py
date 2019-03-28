@@ -1,5 +1,6 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
+from distutils.version import LooseVersion
 import sys
 import platform
 import re

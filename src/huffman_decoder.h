@@ -1,6 +1,7 @@
 #pragma once
 
 #include "huffman_decoder_generated.h"
+#include "bit_stream.h"
 #include "prefix_code.h"
 
 #include <unordered_map>
@@ -17,17 +18,18 @@ std::unordered_map<uint8_t, PrefixCode> createCanonicalPrefixCodes(
 
 class HuffmanTableDecoder {
 public:
+    struct DecodeState {
+        BitStreamReader reader;
+        size_t bitsToPull;
+    };
+
     HuffmanTableDecoder(
         const std::vector<uint8_t>& keys,
         const std::vector<uint32_t>& sizeOffsets,
         size_t maxDirectDecodeBitLength);
 
-    std::vector<uint8_t> decode(const std::vector<uint8_t>& encodedData, size_t count) const;
-    void decode(
-        const uint8_t* source,
-        size_t sourceSize,
-        uint8_t* destination,
-        size_t unpackCount) const;
+    DecodeState decode(const uint8_t* source, size_t sourceSize) const;
+    uint8_t next(DecodeState& state) const;
 
 private:
     uint16_t baseOffset(const std::unordered_map<uint8_t, PrefixCode>& codes, uint8_t key);

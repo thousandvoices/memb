@@ -11,7 +11,9 @@ find_package(flatbuffers REQUIRED)
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.67 COMPONENTS iostreams unit_test_framework REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+if (NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+endif()
 
 set(FLATBUFFER_SCHEMAS
     src/flatbuffers/kmeans.fbs
@@ -54,6 +56,7 @@ set(BINDING_SOURCES python/memb_bindings.cpp)
 flatbuffers_generate_c_headers(FLATBUFFER_GENERATED ${FLATBUFFER_SCHEMAS})
 include_directories(${PROJECT_BINARY_DIR}/generated)
 include_directories(${Boost_INCLUDE_DIR})
+include_directories(${FLATBUFFERS_INCLUDE_DIR})
 include_directories(src)
 add_custom_target(generate_flatbuffer_headers DEPENDS ${FLATBUFFER_GENERATED_OUTPUTS} ${FLATBUFFER_SCHEMAS})
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_BINARY_DIR}/generated)
