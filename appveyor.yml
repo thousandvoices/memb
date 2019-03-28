@@ -7,9 +7,11 @@ environment:
 install:
   - powershell -ExecutionPolicy Bypass -File %APPVEYOR_BUILD_FOLDER%\tools\development_image\install_deps_windows.ps1
   - ps: "ls \"C:/flatbuffers\""
+  - ps: "ls \"C:/flatbuffers/flatbuffers\""
   - set PATH=C:\flatbuffers;C:\Python36-x64;C:\Python36-x64\scripts;%PATH%
   - echo %PATH%
-  - python --version
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - git submodule update --init --recursive
 
 build_script:
   - python --version
