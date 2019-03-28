@@ -5,6 +5,7 @@ environment:
       PYTHON_ARCH: "64"
 
 install:
+  - powershell -command "& 'tools/development_imange/install_deps_windows.ps1'"
   - ECHO "Filesystem root:"
   - ps: "ls \"C:/\""
   - echo %PATH%
