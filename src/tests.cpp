@@ -103,6 +103,7 @@ BOOST_AUTO_TEST_CASE(duplicateWordThrows)
     BOOST_CHECK_THROW(
         builder.addWord("the", {2.0, 1.0, 2.0}),
         std::runtime_error);
+    BOOST_CHECK(1 == 2);
 }
 
 BOOST_AUTO_TEST_CASE(missingFileThrows)
