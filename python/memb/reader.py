@@ -52,15 +52,17 @@ class Reader(BaseReader):
     Parameters
     ----------
     filename : str or pathib.Path
+    num_threads : int
+        Number of threads used to decode large batches of words
     Attributes
     ----------
     dim : int
         Embeddings dimension
     '''
 
-    def __init__(self, filename):
+    def __init__(self, filename, num_threads=4):
         super().__init__()
-        self._impl = _memb.Reader(str(filename))
+        self._impl = _memb.Reader(str(filename), num_threads)
 
     @property
     def dim(self):
