@@ -1,7 +1,7 @@
 pip install wheel
 pip wheel $env:APPVEYOR_BUILD_FOLDER
 
-$tests_build_dir = $env:APPVEYOR_BUILD_FOLDER/build
+$tests_build_dir = "$env:APPVEYOR_BUILD_FOLDER/build"
 New-Item -ItemType directory -Path $tests_build_dir
 Set-Location $tests_build_dir
 
