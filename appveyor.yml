@@ -6,15 +6,11 @@ environment:
 
 install:
   - powershell -ExecutionPolicy Bypass -File %APPVEYOR_BUILD_FOLDER%\tools\development_image\install_deps_windows.ps1
-  - ps: "ls \"C:/flatbuffers\""
-  - ps: "ls \"C:/flatbuffers/flatbuffers\""
-  - set PATH=C:\flatbuffers;C:\Python36-x64;C:\Python36-x64\scripts;%PATH%
+  - set PATH=C:\flatbuffers;C:\Python36-x64;C:\Python36-x64\scripts;C:\Libraries\boost_1_67_0;%PATH%
   - echo %PATH%
   - cd %APPVEYOR_BUILD_FOLDER%
   - git submodule update --init --recursive
 
 build_script:
-  - python --version
-  - pip --version
   - pip install wheel
   - pip wheel %APPVEYOR_BUILD_FOLDER%
