@@ -53,7 +53,8 @@ class Reader(BaseReader):
     ----------
     filename : str or pathib.Path
     num_threads : int
-        Number of threads used to decode large batches of words
+        Number of threads used to decode large batches of words.
+        Pass 0 to use as much threads as there are cores in the system
     Attributes
     ----------
     dim : int

@@ -31,6 +31,7 @@ private:
         boost::iterator_range<std::vector<std::string>::const_iterator> words,
         float* buffer) const;
     const wire::Index* getIndexChecked() const;
+    size_t adjustedNumThreads(size_t numThreads) const;
 
     size_t numThreads_;
     boost::iostreams::mapped_file_source mappedFile_;

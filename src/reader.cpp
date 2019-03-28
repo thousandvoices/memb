@@ -13,7 +13,7 @@ const size_t THREADED_DECODER_THRESHOLD = 1024;
 Reader::Reader(const std::string& filename,
                std::shared_ptr<CompressionStrategy> compressionStrategy,
                size_t numThreads):
-    numThreads_(numThreads),
+    numThreads_(adjustedNumThreads(numThreads)),
     mappedFile_(filename),
     flatIndex_(getIndexChecked()),
     compressedStorage_(compressionStrategy->createCompressedStorage(
@@ -22,7 +22,7 @@ Reader::Reader(const std::string& filename,
 }
 
 Reader::Reader(const std::string& filename, size_t numThreads):
-    numThreads_(numThreads),
+    numThreads_(adjustedNumThreads(numThreads)),
     mappedFile_(filename),
     flatIndex_(getIndexChecked()),
     compressedStorage_(createCompressionStrategy(flatIndex_->storage_type())->createCompressedStorage(
@@ -106,6 +106,15 @@ const wire::Index* Reader::getIndexChecked() const
     }
 
     return wire::GetIndex(mappedFile_.data());
+}
+
+size_t Reader::adjustedNumThreads(size_t numThreads) const
+{
+    if (numThreads > 0) {
+        return numThreads;
+    }
+
+    return std::max(std::thread::hardware_concurrency(), 1u);
 }
 
 }
