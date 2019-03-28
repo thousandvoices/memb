@@ -17,20 +17,21 @@ struct WordVector {
     std::vector<float> embedding;
 };
 
+std::vector<WordVector> testVectors = {
+    {"the", {0.0, 1.0, 2.0}},
+    {"of", {0.0, -1.0, 2.0}},
+    {"th", {2.0, 0.0, 1.0}},
+    {"a", {1.0, 0.0, -2.0}},
+    {"tho", {2.0, 0.0, -1.0}},
+    {"abc", {-2.0, 0.0, 1.0}},
+};
+
 void builderTestImpl(wire::Storage storageType, std::shared_ptr<CompressionStrategy> compression)
 {
-    std::vector<WordVector> wordVectors = {
-        {"the", {0.0, 1.0, 2.0}},
-        {"of", {0.0, -1.0, 2.0}},
-        {"th", {2.0, 0.0, 1.0}},
-        {"a", {1.0, 0.0, -2.0}},
-        {"tho", {2.0, 0.0, -1.0}},
-        {"abc", {-2.0, 0.0, 1.0}},
-    };
     std::vector<std::string> expectedKeys;
 
     Builder builder(3, storageType, 8);
-    for (const auto& wordVector : wordVectors) {
+    for (const auto& wordVector : testVectors) {
         builder.addWord(wordVector.word, wordVector.embedding);
         expectedKeys.push_back(wordVector.word);
     }
@@ -41,7 +42,7 @@ void builderTestImpl(wire::Storage storageType, std::shared_ptr<CompressionStrat
     Reader reader(STORAGE_FILENAME, compression);
     BOOST_REQUIRE(expectedKeys == reader.keys());
 
-    for (const auto& wordVector : wordVectors) {
+    for (const auto& wordVector : testVectors) {
         auto embedding = reader.wordEmbedding(wordVector.word);
         BOOST_REQUIRE(embedding.size() == wordVector.embedding.size());
         for (size_t idx = 0; idx < embedding.size(); ++idx) {
@@ -84,6 +85,31 @@ public:
 BOOST_AUTO_TEST_CASE(trainedBuilderWorksWithIndirectDecoder)
 {
     builderTestImpl(wire::Storage_Trained, std::make_shared<TestTrainedCompressionStrategy>());
+}
+
+BOOST_AUTO_TEST_CASE(threadedDecoderWorks)
+{
+    Builder builder(3, wire::Storage_Trained, 8);
+    for (const auto& wordVector : testVectors) {
+        builder.addWord(wordVector.word, wordVector.embedding);
+    }
+    builder.save(STORAGE_FILENAME);
+
+    Reader reader(STORAGE_FILENAME, 1);
+    Reader threadedReader(STORAGE_FILENAME, 4);
+    std::vector<std::string> batch;
+
+    for (size_t i = 0; i < 1025; ++i) {
+        batch.push_back(testVectors[i % testVectors.size()].word);
+    }
+
+    auto embedding = reader.batchEmbedding(batch);
+    auto threadedEmbedding = threadedReader.batchEmbedding(batch);
+
+    BOOST_REQUIRE(embedding.size() == threadedEmbedding.size());
+    for (size_t idx = 0; idx < embedding.size(); ++idx) {
+        BOOST_CHECK_EQUAL(embedding[idx], threadedEmbedding[idx]);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(invalidDimensionThrows)

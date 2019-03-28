@@ -64,6 +64,9 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_BINARY
 add_library(memb STATIC ${MEMB_SOURCES} ${MEMB_HEADERS})
 add_dependencies(memb generate_flatbuffer_headers)
 target_link_libraries(memb ${Boost_LIBRARIES})
+if (UNIX AND NOT APPLE)
+    target_link_libraries(memb pthread)
+endif()
 
 add_executable(test_runner ${TEST_SOURCES})
 target_link_libraries(test_runner memb)

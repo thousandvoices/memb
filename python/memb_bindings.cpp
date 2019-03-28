@@ -34,7 +34,7 @@ PYBIND11_MODULE(_memb, m) {
             });
 
     py::class_<memb::Reader>(m, "Reader")
-        .def(py::init<std::string>())
+        .def(py::init<std::string, size_t>())
         .def(
             "dim",
             [](memb::Reader& reader)
