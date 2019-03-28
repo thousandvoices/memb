@@ -1,6 +1,6 @@
-cmake -A x64 $env:APPVEYOR_BUILD_DIR
+cmake -A x64 $env:APPVEYOR_BUILD_FOLDER
 cmake --build .
 $env:BOOST_TEST_LOG_LEVEL = "test_suite"
 
 pip install wheel
-pip wheel $env:APPVEYOR_BUILD_DIR
+pip wheel $env:APPVEYOR_BUILD_FOLDER
