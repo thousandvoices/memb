@@ -8,5 +8,6 @@ install:
   - powershell -ExecutionPolicy Bypass -File %APPVEYOR_BUILD_FOLDER%\tools\development_image\install_deps_windows.ps1
   - ECHO "Filesystem root:"
   - ps: "ls \"C:/\""
+  - ps: "ls \"C:/flatbuffers\""
   - echo %PATH%
   - python --version
