@@ -5,12 +5,11 @@ environment:
       PYTHON_ARCH: "64"
 
 install:
-  - powershell -ExecutionPolicy Bypass -File %APPVEYOR_BUILD_FOLDER%\tools\development_image\install_deps_windows.ps1
+  - powershell -File %APPVEYOR_BUILD_FOLDER%\tools\development_image\install_deps_windows.ps1
   - set PATH=C:\flatbuffers;C:\Python36-x64;C:\Python36-x64\scripts;C:\Libraries\boost_1_67_0;%PATH%
   - echo %PATH%
   - cd %APPVEYOR_BUILD_FOLDER%
   - git submodule update --init --recursive
 
 build_script:
-  - pip install wheel
-  - pip wheel %APPVEYOR_BUILD_FOLDER%
+  - powershell -File %APPVEYOR_BUILD_FOLDER%\tools\development_image\build.ps1
