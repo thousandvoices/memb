@@ -14,4 +14,5 @@ install:
 build_script:
   - python --version
   - pip --version
+  - pip install wheel
   - pip wheel %APPVEYOR_BUILD_FOLDER%
