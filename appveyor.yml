@@ -7,6 +7,7 @@ environment:
 install:
   - powershell -ExecutionPolicy Bypass -File %APPVEYOR_BUILD_FOLDER%\tools\development_image\install_deps_windows.ps1
   - ps: "ls \"C:/flatbuffers\""
+  - ps: "ls \"C:/Program Files (x86)/Microsoft Visual Studio\""
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
   - set PATH=C:\flatbuffers;C:\Python36-x64;C:\Python36-x64\scripts;%PATH%
   - echo %PATH%
