@@ -46,11 +46,8 @@ PYBIND11_MODULE(_memb, m) {
             [](memb::Reader& reader, const std::string& word)
             {
                 py::array_t<float> result(reader.dim());
-                auto resultVector = reader.wordEmbedding(word);
-                std::copy(
-                    resultVector.begin(),
-                    resultVector.end(),
-                    reinterpret_cast<float*>(result.request().ptr));
+                auto buffer = result.request();
+                reader.wordEmbeddingToBuffer(word, reinterpret_cast<float*>(buffer.ptr));
 
                 return result;
             })
@@ -58,17 +55,11 @@ PYBIND11_MODULE(_memb, m) {
             "batch_embedding",
             [](memb::Reader& reader, const std::vector<std::string>& words)
             {
-                auto resultVector = reader.batchEmbedding(words);
-                std::vector<size_t> resultShape = {words.size(), reader.dim()};
-                std::vector<size_t> resultStrides = {reader.dim() * sizeof(float), sizeof(float)};
+                py::array_t<float> result({words.size(), reader.dim()});
+                auto buffer = result.request();
+                reader.batchEmbeddingToBuffer(words, reinterpret_cast<float*>(buffer.ptr));
 
-                return py::array(py::buffer_info(
-                    resultVector.data(),
-                    sizeof(float),
-                    py::format_descriptor<float>::value,
-                    2,
-                    resultShape,
-                    resultStrides));
+                return result;
             })
         .def(
             "keys",

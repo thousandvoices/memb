@@ -34,12 +34,15 @@ FullCompressedStorage::FullCompressedStorage(const void* flatStorage):
     flatStorage_(static_cast<const wire::Full*>(flatStorage))
 {}
 
-void FullCompressedStorage::extract(const std::string& word, float* destination) const
+bool FullCompressedStorage::extract(const std::string& word, float* destination) const
 {
     auto resultNode = flatStorage_->nodes()->LookupByKey(word.c_str());
     if (resultNode) {
         auto values = resultNode->values();
         std::copy(values->begin(), values->end(), destination);
+        return true;
+    } else {
+        return false;
     }
 }
 

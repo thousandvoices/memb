@@ -51,7 +51,7 @@ UniformCompressedStorage::UniformCompressedStorage(const void* flatStorage):
     flatStorage_(static_cast<const wire::Uniform*>(flatStorage))
 {}
 
-void UniformCompressedStorage::extract(const std::string& word, float* destination) const
+bool UniformCompressedStorage::extract(const std::string& word, float* destination) const
 {
     auto resultNode = flatStorage_->nodes()->LookupByKey(word.c_str());
     if (resultNode) {
@@ -70,6 +70,9 @@ void UniformCompressedStorage::extract(const std::string& word, float* destinati
                 auto floatValue = static_cast<float>(value);
                 return minValue + (maxValue - minValue) * floatValue / quantizationLevels;
             });
+        return true;
+    } else {
+        return false;
     }
 }
 

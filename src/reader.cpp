@@ -18,8 +18,7 @@ Reader::Reader(const std::string& filename,
     flatIndex_(getIndexChecked()),
     compressedStorage_(compressionStrategy->createCompressedStorage(
         flatIndex_->storage(), flatIndex_->dim()))
-{
-}
+{}
 
 Reader::Reader(const std::string& filename, size_t numThreads):
     numThreads_(adjustedNumThreads(numThreads)),
@@ -41,7 +40,10 @@ std::vector<std::string> Reader::keys() const
 
 void Reader::wordEmbeddingToBuffer(const std::string& word, float* buffer) const
 {
-    return compressedStorage_->extract(word, buffer);
+    auto extractResult = compressedStorage_->extract(word, buffer);
+    if (!extractResult) {
+        std::fill(buffer, buffer + dim(), 0);
+    }
 }
 
 void Reader::batchEmbeddingToBufferImpl(
@@ -85,7 +87,7 @@ void Reader::batchEmbeddingToBuffer(const std::vector<std::string>& words, float
 
 std::vector<float> Reader::wordEmbedding(const std::string& word) const
 {
-    std::vector<float> result(flatIndex_->dim(), 0);
+    std::vector<float> result(flatIndex_->dim());
     wordEmbeddingToBuffer(word, result.data());
 
     return result;
@@ -93,7 +95,7 @@ std::vector<float> Reader::wordEmbedding(const std::string& word) const
 
 std::vector<float> Reader::batchEmbedding(const std::vector<std::string>& words) const
 {
-    std::vector<float> result(flatIndex_->dim() * words.size(), 0);
+    std::vector<float> result(flatIndex_->dim() * words.size());
     batchEmbeddingToBuffer(words, result.data());
 
     return result;

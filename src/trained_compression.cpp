@@ -110,7 +110,7 @@ TrainedCompressedStorage::TrainedCompressedStorage(
     centroids_(KMeansClusterizer::load(flatStorage_->clusterizer()).centroids())
 {}
 
-void TrainedCompressedStorage::extract(const std::string& word, float* destination) const
+bool TrainedCompressedStorage::extract(const std::string& word, float* destination) const
 {
     auto wordData = flatStorage_->packed_words()->data();
     auto resultIt = std::lower_bound(
@@ -133,6 +133,9 @@ void TrainedCompressedStorage::extract(const std::string& word, float* destinati
         for (size_t i = 0; i < dim_; ++i) {
             destination[i] = centroids_[huffmanDecoder_.next(decodeState)];
         }
+        return true;
+    } else {
+        return false;
     }
 }
 
