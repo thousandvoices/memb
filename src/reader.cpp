@@ -116,7 +116,7 @@ size_t Reader::adjustedNumThreads(size_t numThreads) const
         return numThreads;
     }
 
-    return std::max(std::thread::hardware_concurrency(), 1u);
+    return std::max(std::thread::hardware_concurrency(), 2u);
 }
 
 }

@@ -61,7 +61,7 @@ class Reader(BaseReader):
         Embeddings dimension
     '''
 
-    def __init__(self, filename, num_threads=4):
+    def __init__(self, filename, num_threads=0):
         super().__init__()
         self._impl = _memb.Reader(str(filename), num_threads)
 

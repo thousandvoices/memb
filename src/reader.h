@@ -10,11 +10,11 @@ namespace memb {
 
 class Reader {
 public:
-    Reader(const std::string& filename, size_t numThreads = 4);
+    Reader(const std::string& filename, size_t numThreads = 0);
     Reader(
         const std::string& filename,
         std::shared_ptr<CompressionStrategy> compressionStrategy,
-        size_t numThreads = 4);
+        size_t numThreads = 0);
 
     size_t dim() const;
 
