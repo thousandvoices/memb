@@ -36,7 +36,7 @@ to match full models.
 ## Quickstart
 * Download and install wheels from [releases page](https://github.com/thousandvoices/memb/releases)
 * Obtain compressed embedding files:
-  * Download pretrained vectors from https://drive.google.com/drive/folders/1L-iaHBHEeozbwx9OmceEr2JmzA2HKGRF.
+  * Download pretrained vectors from https://drive.google.com/open?id=1g2Bv-5qscDRdnD4UjE6TAB2uaNdz2JdU.
   Glove 840B, fasttext crawl (english), tayga_upos_skipgram_300_2_2019 and ruscorpora_upos_cbow_300_20_2019 
   (russian from [RusVectores](https://rusvectores.org/ru/models/) project) are available at the moment.
   * Or use memb_converter tool to convert embeddings from word2vec text format. It is recommended to pass 
@@ -74,7 +74,7 @@ union = ReadersUnion(readers, mode='concatenate')
 print(union['the'])
 ```
 
-[`tokenizer_embedding`](https://github.com/thousandvoices/memb/blob/master/python/memb/reader.py#L38) method creates 
+[`tokenizer_embedding`](https://github.com/thousandvoices/memb/blob/master/python/memb/reader.py#L94) method creates 
 an array suitable for using as `Embedding` layer weights from 
 [`keras.preprocessing.text.Tokenizer`](https://keras.io/preprocessing/text/)
 ```python
