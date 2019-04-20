@@ -12,7 +12,9 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost 1.67 COMPONENTS iostreams unit_test_framework REQUIRED)
 
 if (NOT MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -O3")
+else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /O2")
 endif()
 
 set(FLATBUFFER_SCHEMAS
@@ -26,11 +28,11 @@ set(FLATBUFFER_SCHEMAS
 set(MEMB_SOURCES
     src/builder.cpp
     src/reader.cpp
-    src/bit_stream.cpp
     src/compression_strategy.cpp
     src/kmeans.cpp
     src/huffman_encoder.cpp
     src/huffman_decoder.cpp
+    src/prefix_code.cpp
     src/trained_compression.cpp
     src/full_compression.cpp
     src/uniform_compression.cpp)
@@ -39,10 +41,13 @@ set(MEMB_HEADERS
     src/builder.h
     src/reader.h
     src/bit_stream.h
+    src/bit_stream_reader.h
     src/compression_strategy.h
     src/kmeans.h
     src/huffman_encoder.h
     src/huffman_decoder.h
+    src/huffman_table_decoder.h
+    src/prefix_code.h
     src/trained_compression.h
     src/full_compression.h
     src/uniform_compression.h)
@@ -51,6 +56,7 @@ set(TEST_SOURCES
     src/kmeans_tests.cpp
     src/bit_stream_tests.cpp
     src/tests.cpp)
+
 set(BINDING_SOURCES python/memb_bindings.cpp)
 
 flatbuffers_generate_c_headers(FLATBUFFER_GENERATED ${FLATBUFFER_SCHEMAS})
