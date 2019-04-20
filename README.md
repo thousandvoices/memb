@@ -74,7 +74,7 @@ union = ReadersUnion(readers, mode='concatenate')
 print(union['the'])
 ```
 
-[`tokenizer_embedding`](https://github.com/thousandvoices/memb/blob/master/python/memb/reader.py#L38) method creates 
+[`tokenizer_embedding`](https://github.com/thousandvoices/memb/blob/master/python/memb/reader.py#L94) method creates 
 an array suitable for using as `Embedding` layer weights from 
 [`keras.preprocessing.text.Tokenizer`](https://keras.io/preprocessing/text/)
 ```python
