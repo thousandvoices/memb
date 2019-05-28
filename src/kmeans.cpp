@@ -18,9 +18,10 @@ KMeansClusterizer::KMeansClusterizer(size_t dim):
 {}
 
 KMeansClusterizer::KMeansClusterizer(const std::vector<float>& centroids):
-    dim_(centroids.size()),
-    centroids_(centroids)
-{}
+    dim_(centroids.size())
+{
+    setCentroids(centroids);
+}
 
 void KMeansClusterizer::fit(const std::vector<float>& data)
 {
@@ -28,9 +29,11 @@ void KMeansClusterizer::fit(const std::vector<float>& data)
     float minValue = *(minMaxValues.first);
     float maxValue = *(minMaxValues.second);
 
+    std::vector<float> centroids;
     for (size_t centroidIdx = 0; centroidIdx < dim_; ++centroidIdx) {
-        centroids_.push_back(minValue + centroidIdx / static_cast<float>(dim_ - 1) * (maxValue - minValue));
+        centroids.push_back(minValue + centroidIdx / static_cast<float>(dim_ - 1) * (maxValue - minValue));
     }
+    setCentroids(centroids);
 
     for (size_t epoch = 0; epoch < MAX_ITERATIONS; ++epoch) {
         updateCentroids(data, predict(data));
@@ -48,18 +51,13 @@ void KMeansClusterizer::fit(const std::vector<float>& data)
     }
 
     auto smallClusterSizeLimit = maxCount / SMALL_CLUSTER_FACTOR;
-    auto centroidsStart = &*centroids_.begin();
-
-    centroids_.erase(
-        std::remove_if(
-            centroids_.begin(),
-            centroids_.end(),
-            [&counts, &centroidsStart, smallClusterSizeLimit](const float& centroid)
-            {
-                return counts[&centroid - centroidsStart] < smallClusterSizeLimit;
-            }),
-        centroids_.end()
-    );
+    std::vector<float> prunedCentroids;
+    for (size_t i = 0; i < centroids_.size(); ++i) {
+        if (counts[i] > smallClusterSizeLimit) {
+            prunedCentroids.push_back(centroids_[i]);
+        }
+    }
+    setCentroids(prunedCentroids);
 
     updateCentroids(data, predict(data));
 }
@@ -73,16 +71,8 @@ std::vector<uint8_t> KMeansClusterizer::predict(const std::vector<float>& data) 
     std::vector<uint8_t> result;
 
     for (auto value : data) {
-        auto pivot = std::lower_bound(centroids_.begin(), centroids_.end(), value);
-        
-        bool usePivot = (pivot == centroids_.begin()) 
-            || ((pivot != centroids_.end()) && (*pivot - value < value - *(pivot - 1)));
-
-        if (usePivot) {
-            result.push_back(pivot - centroids_.begin());
-        } else {
-            result.push_back(pivot - 1 - centroids_.begin());
-        }
+        auto pivot = std::lower_bound(splits_.begin(), splits_.end(), value);
+        result.push_back(pivot - splits_.begin());
     }
 
     return result;
@@ -97,17 +87,28 @@ void KMeansClusterizer::updateCentroids(
     const std::vector<float>& data, const std::vector<uint8_t>& assignments)
 {
     std::vector<size_t> counts(centroids_.size(), 0);
-    centroids_.assign(centroids_.size(), 0);
+    std::vector<float> centroids(centroids_.size(), 0);
 
     for (size_t i = 0; i < data.size(); ++i) {
         auto currentAssignment = assignments[i];
         auto currentCount = static_cast<float>(counts[currentAssignment]);
-        centroids_[currentAssignment] =
-            currentCount / (currentCount + 1) * centroids_[currentAssignment] + 1 / (currentCount + 1) * data[i];
+        centroids[currentAssignment] =
+            currentCount / (currentCount + 1) * centroids[currentAssignment] + 1 / (currentCount + 1) * data[i];
         counts[currentAssignment] += 1;
     }
 
-    std::sort(centroids_.begin(), centroids_.end());
+    std::sort(centroids.begin(), centroids.end());
+    setCentroids(centroids);
+}
+
+void KMeansClusterizer::setCentroids(const std::vector<float>& centroids)
+{
+    centroids_ = centroids;
+
+    splits_.clear();
+    for (size_t i = 0; i < centroids_.size() - 1; ++i) {
+        splits_.push_back(0.5 * (centroids_[i] + centroids_[i + 1]));
+    }
 }
 
 flatbuffers::Offset<wire::KMeansClusterizer> KMeansClusterizer::save(
