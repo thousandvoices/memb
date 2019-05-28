@@ -24,9 +24,11 @@ private:
 
     void updateCentroids(
         const std::vector<float>& data, const std::vector<uint8_t>& assignments);
+    void setCentroids(const std::vector<float>& centroids);
 
     size_t dim_;
     std::vector<float> centroids_;
+    std::vector<float> splits_;
 };
 
 }
